@@ -1,6 +1,6 @@
 <template>
   <v-app class="grey lighten-4">
-    <Navbar/>
+    <Navbar v-if="['login'].indexOf($route.name)"/>
     <v-content>
       <router-view></router-view>
     </v-content>

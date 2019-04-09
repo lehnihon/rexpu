@@ -8,7 +8,7 @@
       </v-toolbar-title>
       <v-spacer></v-spacer>
       <v-btn flat color="grey">
-        <span>Sign Out</span>
+        <span>Logout</span>
         <v-icon right>exit_to_app</v-icon>
       </v-btn>
     </v-toolbar>
@@ -45,7 +45,7 @@ export default {
       mini: true,
       links:[
           { icon: 'dashboard', text: 'Dashboard', route: '/' },
-          { icon: 'folder', text: 'My Projects', route: '/projects' },
+          { icon: 'folder', text: 'Configurações', route: '/configuracoes' },
           { icon: 'person', text: 'Team', route: '/team' }
       ]
     };
