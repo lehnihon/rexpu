@@ -1,18 +1,18 @@
 <template>
   <nav>
     <v-toolbar flat app>
-      <v-toolbar-side-icon class="grey--text" @click="mini= !mini"></v-toolbar-side-icon>
+      <v-toolbar-side-icon class="grey--text" @click="drawer= !drawer"></v-toolbar-side-icon>
       <v-toolbar-title class="text-uppercase grey--text">
         <span class="font-weight-light">Win</span>
         <span>Up</span>
       </v-toolbar-title>
       <v-spacer></v-spacer>
-      <v-btn flat color="grey">
+      <v-btn @click="logout" flat color="grey">
         <span>Logout</span>
         <v-icon right>exit_to_app</v-icon>
       </v-btn>
     </v-toolbar>
-    <v-navigation-drawer :mini-variant.sync="mini" fixed app class="primary">
+    <v-navigation-drawer :mini-variant.sync="mini" v-model="drawer"  fixed app class="primary">
       <v-list>
         <v-list-tile avatar>
           <v-list-tile-avatar>
@@ -39,16 +39,23 @@
 </template>
 
 <script>
+import { mapActions } from 'vuex';
 export default {
   data() {
     return {
       mini: true,
+      drawer:false,
       links:[
           { icon: 'dashboard', text: 'Dashboard', route: '/' },
           { icon: 'folder', text: 'Configurações', route: '/configuracoes' },
           { icon: 'person', text: 'Team', route: '/team' }
       ]
     };
+  },
+  methods: {
+    ...mapActions([
+      'logout'
+    ])
   }
 };
 </script>
