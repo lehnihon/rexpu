@@ -13,8 +13,8 @@
               <v-layout row wrap>
                 <v-flex xs12>
                   <v-text-field
-                    label="Wordpress Endpoint"
-                    v-model="wp_endpoint"
+                    label="Wordpress ID"
+                    v-model="wp_user"
                     :loading="loading"
                   ></v-text-field>
                 </v-flex>
@@ -107,7 +107,7 @@
     data: () => ({
       response: false,
       headers: null,
-      wp_endpoint:'',
+      wp_user:'',
       wp_login:'',
       wp_password:'',
       loading: true,
@@ -131,7 +131,7 @@
             }
           })
           .then(response => {
-            this.wp_endpoint = response.data.wp_endpoint
+            this.wp_user = response.data.wp_user
             this.wp_login = response.data.wp_login
             this.wp_password = response.data.wp_password
             setTimeout(() => {
@@ -145,7 +145,7 @@
         axios
           .put(process.env.VUE_APP_API_URL+"/config",{
             id_user: this.jwt_decode.sub,
-            wp_endpoint: this.wp_endpoint,
+            wp_user: this.wp_user,
             wp_login:this.wp_login,
             wp_password:this.wp_password
           },

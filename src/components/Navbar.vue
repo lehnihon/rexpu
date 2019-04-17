@@ -47,6 +47,7 @@ export default {
       drawer:false,
       links:[
           { icon: 'dashboard', text: 'Dashboard', route: '/' },
+          { icon: 'group_work', text: 'Matérias', route: '/materias' },
           { icon: 'folder', text: 'Configurações', route: '/configuracoes' },
           { icon: 'person', text: 'Team', route: '/team' }
       ]

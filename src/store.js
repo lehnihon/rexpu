@@ -9,7 +9,9 @@ export default new Vuex.Store({
   state: {
     accessToken: null,
     loggingIn: false,
-    loginError: null
+    loginError: null,
+    accessTokenWP:null,
+    userWP:null
   },
   mutations: {
     loginStart: state => state.loggingIn = true,
@@ -22,28 +24,54 @@ export default new Vuex.Store({
     },
     logout: (state) => {
       state.accessToken = null;
+      state.accessTokenWP = null;
+    },
+    updateAccessTokenWP: (state, accessTokenWP) => {
+      state.accessTokenWP = accessTokenWP;
+    },
+    updateUserWP: (state, userWP) => {
+      state.userWP = userWP;
     }
   },
   actions: {
-    doLogin({ commit }, loginData) {
+    doLogin({ commit, dispatch }, loginData) {
       commit('loginStart');
 
       axios.post(process.env.VUE_APP_API_URL + "/auth/login", {
         ...loginData
       })
-      .then(response => {
-        localStorage.setItem('accessToken', response.data.token);
-        commit('loginStop', null);
-        commit('updateAccessToken', response.data.token);
+        .then(response => {
+          localStorage.setItem('accessToken', response.data.token);
+          commit('loginStop', null);
+          commit('updateAccessToken', response.data.token);
+          dispatch('doLoginWP');
+        })
+        .catch(error => {
+          commit('loginStop', error.response.data.error);
+          commit('updateAccessToken', null);
+        })
+    },
+    doLoginWP({ commit }) {
+      axios
+        .get(process.env.VUE_APP_API_URL + "/config", {
+          headers: {
+            'Authorization': "Bearer " + this.state.accessToken
+          }
+        })
+        .then(response => {
+          localStorage.setItem('accessTokenWP', btoa(response.data.wp_login+":"+response.data.wp_password));
+          localStorage.setItem('userWP', response.data.wp_user);
+          commit('updateAccessTokenWP', btoa(response.data.wp_login+":"+response.data.wp_password));
+          commit('updateUserWP', response.data.wp_user);
+        })
         router.push('/configuracoes');
-      })
-      .catch(error => {
-        commit('loginStop', error.response.data.error);
-        commit('updateAccessToken', null);
-      })
     },
     fetchAccessToken({ commit }) {
       commit('updateAccessToken', localStorage.getItem('accessToken'));
+    },
+    fetchAccessWP({ commit }) {
+      commit('updateAccessTokenWP', localStorage.getItem('accessTokenWP'));
+      commit('updateUserWP', localStorage.getItem('userWP'));
     },
     logout({ commit }) {
       localStorage.removeItem('accessToken');

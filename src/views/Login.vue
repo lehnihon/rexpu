@@ -14,13 +14,15 @@
               <v-toolbar-title>Login form</v-toolbar-title>
             </v-toolbar>
             <v-card-text>
-              <v-form>
+              <v-form v-model="valid" >
                 <v-text-field
                   v-model="email"
                   prepend-icon="person"
                   name="login"
                   label="Login"
                   type="text"
+                  :rules="emailRules"
+                  required
                 ></v-text-field>
                 <v-text-field
                   v-model="password"
@@ -29,31 +31,18 @@
                   name="password"
                   label="Password"
                   type="password"
+                  :rules="passwordRules"
                 ></v-text-field>
               </v-form>
             </v-card-text>
             <v-card-actions>
               <v-spacer></v-spacer>
-              <v-btn color="primary" @click="login()">Login</v-btn>
+              <v-btn :disabled="!valid" color="primary" @click="login()">Login</v-btn>
             </v-card-actions>
           </v-card>
         </v-flex>
       </v-layout>
     </v-container>
-    <v-snackbar
-      v-model="snackbar"
-      bottom
-      timeout="6000"
-    >
-    {{ snackbarText }}
-      <v-btn
-        color="pink"
-        flat
-        @click="snackbar = false"
-      >
-        fechar
-      </v-btn>
-    </v-snackbar>
   </div>
 </template>
 
@@ -64,10 +53,15 @@ import { mapState, mapActions } from 'vuex';
 export default {
   components: {},
   data: () => ({
-      email: null,
-      password: null,
-      snackbar: false,
-      snackbarText: ''
+    valid: false,
+    email: null,
+    emailRules:[
+      (v) => !!v || 'Email é obrigatório',
+    ],
+    password: null,
+    passwordRules:[
+      (v) => !!v || 'Password é obrigatório',
+    ],
   }),
   computed:{
     ...mapState([
