@@ -46,10 +46,14 @@ export default {
       mini: true,
       drawer:false,
       links:[
-          { icon: 'dashboard', text: 'Dashboard', route: '/' },
-          { icon: 'group_work', text: 'Matérias', route: '/materias' },
-          { icon: 'folder', text: 'Configurações', route: '/configuracoes' },
-          { icon: 'person', text: 'Team', route: '/team' }
+          { icon: 'dashboard', text: 'Painel', route: '/' },
+          { icon: 'person_pin', text: 'Membros', route: '/membros' },
+          { icon: 'computer', text: 'Matérias', route: '/materias' },
+          { icon: 'assignment', text: 'Relatórios', route: '/relatorios' },
+          { icon: 'question_answer', text: 'Suporte/Ticket', route: '/suporte-ticket' },
+          { icon: 'help_outline', text: 'Dúvidas Frequentes', route: '/duvidas-frequentes' },
+          { icon: 'monetization_on', text: 'Financeiro', route: '/financeiro' },
+          { icon: 'build', text: 'Configurações', route: '/configuracoes' },
       ]
     };
   },

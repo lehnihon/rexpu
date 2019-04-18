@@ -2,10 +2,15 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import store from './store';
 import Login from './views/Login'
-import Dashboard from './views/Dashboard'
-import Configuracoes from './views/Configuracoes'
-import Team from './views/Team'
+import Painel from './views/Painel'
+import Membros from './views/Membros'
 import Materias from './views/Materias'
+import Relatorios from './views/Relatorios'
+import SuporteTicket from './views/SuporteTicket'
+import DuvidasFrequentes from './views/DuvidasFrequentes'
+import Financeiro from './views/Financeiro'
+import Configuracoes from './views/Configuracoes'
+
 
 Vue.use(Router)
 
@@ -15,8 +20,8 @@ const router =  new Router({
   routes: [
     {
       path: '/',
-      name: 'dashboard',
-      component: Dashboard
+      name: 'painel',
+      component: Painel
     },
     {
       path: '/login',
@@ -24,19 +29,39 @@ const router =  new Router({
       component: Login
     },
     {
-      path: '/configuracoes',
-      name: 'configuracoes',
-      component: Configuracoes
-    },
-    {
-      path: '/team',
-      name: 'team',
-      component: Team
+      path: '/membros',
+      name: 'membros',
+      component: Membros
     },
     {
       path: '/materias',
       name: 'materias',
       component: Materias
+    },
+    {
+      path: '/relatorios',
+      name: 'relatorios',
+      component: Relatorios
+    },
+    {
+      path: '/suporte-ticket',
+      name: 'suporte-ticket',
+      component: SuporteTicket
+    },
+    {
+      path: '/duvidas-frequentes',
+      name: 'duvidas-frequentes',
+      component: DuvidasFrequentes
+    },
+    {
+      path: '/financeiro',
+      name: 'financeiro',
+      component: Financeiro
+    },
+    {
+      path: '/configuracoes',
+      name: 'configuracoes',
+      component: Configuracoes
     },
     {
       path: '*',

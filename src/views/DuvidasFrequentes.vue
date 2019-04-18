@@ -1,10 +1,10 @@
 <template>
-  <div class="team">
-    <h1 class="subheading grey--text mx-4">Team</h1>
+  <div class="duvidas-frequentes">
+    <h1 class="subheading grey--text mx-4">Dúvidas Frequentes</h1>
     <v-container>
-      <v-layout row>
+      <v-layout row wrap>
         <v-flex xs12>
-
+          
         </v-flex>
       </v-layout>
     </v-container>

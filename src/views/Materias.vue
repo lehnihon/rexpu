@@ -67,14 +67,15 @@ export default {
   data: () => ({
     headers: null,
     snackbar: false,
-    snackbarText: "",
+    snackbarText: '',
     headers:[
       {text:'ID',value:'id'},
       {text:'Título',value:'title.rendered'},
       {text:'Status',value:'status'},
       { text: 'Ações', sortable: false }
     ],
-    materiasList:[]
+    materiasList:[],
+    search:''
   }),
   computed: {
     ...mapState(["accessToken", "accessTokenWP"])
