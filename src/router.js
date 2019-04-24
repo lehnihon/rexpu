@@ -82,7 +82,7 @@ router.beforeEach((to, from, next) => {
   
   if (to.fullPath === '/login') {
     if (store.state.accessToken) {
-      next('/configuracoes');
+      next('/');
     }
   }
   next();

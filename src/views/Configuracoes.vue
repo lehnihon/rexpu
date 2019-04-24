@@ -1,5 +1,6 @@
 <template>
   <div class="projects">
+    <v-progress-linear height="3" style="position:fixed; z-index:1000" v-show="loading"  :indeterminate="true"></v-progress-linear>
     <h1 class="subheading grey--text mx-4">Configurações</h1>
     <v-container grid-list-md>
       <v-layout row wrap>
@@ -15,21 +16,18 @@
                   <v-text-field
                     label="Wordpress ID"
                     v-model="m_wp_user"
-                    :loading="loading"
                   ></v-text-field>
                 </v-flex>
                 <v-flex xs12>
                   <v-text-field
                     label="Wordpress Login"
                     v-model="m_wp_login"
-                    :loading="loading"
                   ></v-text-field>
                 </v-flex>
                 <v-flex xs12>
                   <v-text-field
                     label="Wordpress Senha"
                     v-model="m_wp_password"
-                    :loading="loading"
                   ></v-text-field>
                 </v-flex>
               </v-layout>
@@ -54,28 +52,24 @@
                   <v-text-field
                     label="Banco"
                     v-model="m_bank"
-                    :loading="loading"
                   ></v-text-field>
                 </v-flex>
                 <v-flex xs12>
                   <v-text-field
                     label="Agência"
                     v-model="m_agency"
-                    :loading="loading"
                   ></v-text-field>
                 </v-flex>
                 <v-flex xs12>
                   <v-text-field
                     label="Conta"
                     v-model="m_account"
-                    :loading="loading"
                   ></v-text-field>
                 </v-flex>
                 <v-flex xs12>
                   <v-text-field
                     label="CPF"
                     v-model="m_cpf"
-                    :loading="loading"
                   ></v-text-field>
                 </v-flex>
               </v-layout>
@@ -137,34 +131,23 @@
     methods: {
       getConfiguracoes(){
         this.jwt_decode = this.decodeJWT(this.accessToken)
-        axios
-          .get(process.env.VUE_APP_API_URL+"/config",{
-            headers: {
-              'Authorization': "Bearer " + this.accessToken
-            }
-          })
+        this.$axiosAPI
+          .get(process.env.VUE_APP_API_URL+"/config")
           .then(response => {
             this.m_wp_user = response.data.wp_user
             this.m_wp_login = response.data.wp_login
             this.m_wp_password = response.data.wp_password
             this.m_bank = response.data.bank
             this.m_agency = response.data.agency
-            this.m_account = response.data.wp_password
-            this.m_cpf = response.data.wp_password
-            setTimeout(() => {
-              this.loading = false
-              this.snackbarText = "Dados carregados!"
-              this.snackbar = true
-            }, 1000);
+            this.m_account = response.data.account
+            this.m_cpf = response.data.cpf
+            this.loading = false
           }).catch(function (error) {
-            // handle error
-            if(error.response.status == '401'){
-              router.push('/login');
-            }
+            
           })
       },
       gravarWP(){
-        axios
+        this.$axiosAPI
           .put(process.env.VUE_APP_API_URL+"/config",{
             user_id: this.jwt_decode.sub,
             wp_user: this.m_wp_user,
@@ -174,13 +157,7 @@
             agency:this.m_agency,
             account:this.m_account,
             cpf:this.m_cpf
-          },
-          {
-            headers: {
-              'Authorization': "Bearer " + this.accessToken
-            }
-          }
-          )
+          })
           .then(response => {
             this.snackbarText = "Salvo com sucesso!"
             this.snackbar = true

@@ -11,7 +11,16 @@ export default new Vuex.Store({
     loggingIn: false,
     loginError: null,
     accessTokenWP:null,
+    accessTokenExpire:null,
     userWP:null
+  },
+  getters: {
+    accessToken: state =>{
+      return state.accessToken
+    },
+    accessTokenExpire: state =>{
+      return state.accessTokenExpire
+    }
   },
   mutations: {
     loginStart: state => state.loggingIn = true,
@@ -21,6 +30,9 @@ export default new Vuex.Store({
     },
     updateAccessToken: (state, accessToken) => {
       state.accessToken = accessToken;
+    },
+    updateAccessTokenExpire: (state, accessTokenExpire) => {
+      state.accessTokenExpire = accessTokenExpire;
     },
     logout: (state) => {
       state.accessToken = null;
@@ -41,9 +53,12 @@ export default new Vuex.Store({
         ...loginData
       })
         .then(response => {
+          const expire = Date.now()+(60*60*1000);
           localStorage.setItem('accessToken', response.data.token);
+          localStorage.setItem('accessTokenExpire', expire );
           commit('loginStop', null);
           commit('updateAccessToken', response.data.token);
+          commit('updateAccessTokenExpire', expire );
           dispatch('doLoginWP');
         })
         .catch(error => {
@@ -68,6 +83,7 @@ export default new Vuex.Store({
     },
     fetchAccessToken({ commit }) {
       commit('updateAccessToken', localStorage.getItem('accessToken'));
+      commit('updateAccessTokenExpire', localStorage.getItem('accessTokenExpire'));
     },
     fetchAccessWP({ commit }) {
       commit('updateAccessTokenWP', localStorage.getItem('accessTokenWP'));
