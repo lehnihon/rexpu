@@ -1,6 +1,5 @@
 <template>
   <div class="projects">
-    <v-progress-linear height="3" style="position:fixed; z-index:1000" v-show="loading"  :indeterminate="true"></v-progress-linear>
     <h1 class="subheading grey--text mx-4">Configurações</h1>
     <v-container grid-list-md>
       <v-layout row wrap>
@@ -16,18 +15,21 @@
                   <v-text-field
                     label="Wordpress ID"
                     v-model="m_wp_user"
+                    loading:="loading"
                   ></v-text-field>
                 </v-flex>
                 <v-flex xs12>
                   <v-text-field
                     label="Wordpress Login"
                     v-model="m_wp_login"
+                    loading:="loading"
                   ></v-text-field>
                 </v-flex>
                 <v-flex xs12>
                   <v-text-field
                     label="Wordpress Senha"
                     v-model="m_wp_password"
+                    loading:="loading"
                   ></v-text-field>
                 </v-flex>
               </v-layout>
@@ -52,24 +54,28 @@
                   <v-text-field
                     label="Banco"
                     v-model="m_bank"
+                    loading:="loading"
                   ></v-text-field>
                 </v-flex>
                 <v-flex xs12>
                   <v-text-field
                     label="Agência"
                     v-model="m_agency"
+                    loading:="loading"
                   ></v-text-field>
                 </v-flex>
                 <v-flex xs12>
                   <v-text-field
                     label="Conta"
                     v-model="m_account"
+                    loading:="loading"
                   ></v-text-field>
                 </v-flex>
                 <v-flex xs12>
                   <v-text-field
                     label="CPF"
                     v-model="m_cpf"
+                    loading:="loading"
                   ></v-text-field>
                 </v-flex>
               </v-layout>
@@ -101,7 +107,6 @@
 <script>
   import axios from 'axios'
   import router from '../router';
-  import { mapState } from 'vuex'
   import mixin from '../mixin'
   export default {
     components: {
@@ -123,14 +128,8 @@
       snackbar: false,
       snackbarText: '',
     }),
-    computed: {
-      ...mapState([
-        'accessToken',
-      ])
-    },
     methods: {
       getConfiguracoes(){
-        this.jwt_decode = this.decodeJWT(this.accessToken)
         this.$axiosAPI
           .get(process.env.VUE_APP_API_URL+"/config")
           .then(response => {

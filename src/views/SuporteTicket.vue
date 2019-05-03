@@ -3,8 +3,8 @@
     <h1 class="subheading grey--text mx-4">Suporte/Ticket</h1>
     <v-container grid-list-md>
       <v-layout row wrap>
-        <v-flex xs12>
-          <v-card>
+        <v-flex md6>
+          <v-card height="100%">
             <v-card-title primary-title>
               <h3 class="headline mb-0">Lista de Tickets</h3>
             </v-card-title>
@@ -13,7 +13,7 @@
               <v-layout row wrap>
                 <v-flex xs12>
                   <v-text-field
-                    v-model="search"
+                    v-model="ticket.search"
                     append-icon="search"
                     label="Procurar"
                     single-line
@@ -21,7 +21,7 @@
                   ></v-text-field>
                 </v-flex>
                 <v-flex xs12>
-                  <v-data-table :headers="headers" :items="suporteTicketList" :search="search" :loading="suporteTicketLoadingTable">
+                  <v-data-table disable-initial-sort :headers="ticket.headers" :items="ticket.list" :search="ticket.search" :loading="ticket.loading">
                     <template v-slot:items="props">
                       <td>{{ props.item.id }}</td>
                       <td>{{ props.item.title }}</td>
@@ -43,12 +43,12 @@
             </v-card-text>
           </v-card>
         </v-flex>
-        <v-flex xs12 v-show="novoTicket">
-          <v-card>
+        <v-flex md6 v-show="ticket.new">
+          <v-card height="100%">
             <v-card-title primary-title>
               <h3 class="headline mb-0">Cadastro de Ticket</h3>
             </v-card-title>
-            <v-btn flat fab color="primary" style="position:absolute; right:0; top:0" @click="novoTicket = false">
+            <v-btn flat fab color="primary" style="position:absolute; right:0; top:0" @click="ticket.new = false">
               <v-icon>close</v-icon>
             </v-btn>
 
@@ -57,64 +57,91 @@
                 <v-flex xs12>
                   <v-text-field
                     label="Título"
-                    v-model="m_title"
+                    v-model="ticket.form.title"
                   ></v-text-field>
+                </v-flex>
+                <v-flex xs12>
+                  <v-textarea
+                  label="Descrição"
+                  v-model="ticket.form.description"
+                ></v-textarea>
                 </v-flex>
               </v-layout>
             </v-card-text>
+            <v-card-actions>
+              <v-btn @click="saveSuportTicket" depressed color="primary">Gravar</v-btn>
+            </v-card-actions>
           </v-card>
         </v-flex>
-        <v-btn color="primary" dark fixed bottom right fab @click="novoTicket = true">
-          <v-icon>add</v-icon>
-        </v-btn>
       </v-layout>
     </v-container>
+    <v-btn color="primary" dark fixed bottom right fab @click="ticket.new = true">
+      <v-icon>add</v-icon>
+    </v-btn>
+    <v-snackbar v-model="snackbar" bottom>
+      {{ snackbarText }}
+      <v-btn color="pink" flat @click="snackbar = false">Close</v-btn>
+    </v-snackbar>
   </div>
 </template>
 
 <script>
 import axios from "axios";
-import { mapState } from 'vuex'
 import mixin from "../mixin";
 export default {
   components: {},
   mixins: [mixin],
   data: () => ({
-    headers: null,
     snackbar: false,
     snackbarText: "",
-    headers: [
-      { text: "ID", value: "id" },
-      { text: "Título", value: "title" },
-      { text: "Data", value: "created_at" },
-      { text: "Ações", sortable: false }
-    ],
-    role: "",
-    suporteTicketList: [],
-    search: "",
-    suporteTicketLoadingTable:true,
-    novoTicket:false
+    role:{
+      list:[],
+      obj:{}
+    },
+    ticket:{
+      headers: [
+        { text: "ID", value: "id" },
+        { text: "Título", value: "title" },
+        { text: "Data", value: "created_at" },
+        { text: "Ações", sortable: false }
+      ],
+      list:[],
+      search:'',
+      new:false,
+      loading:true,
+      form:{
+        title:'',
+        description:'',
+        user_id:''
+      }
+    },
+    jwt_decode: ''
   }),
-  computed: {
-    ...mapState([
-      'accessToken',
-    ])
-  },
   methods: {
-    getSuporteTicket() {
-      this.jwt_decode = this.decodeJWT(this.accessToken);
-      this.role = this.jwt_decode.role;
-      axios
-        .get(process.env.VUE_APP_API_URL+"/ticket")
+    getSuportTicket() {
+      this.$axiosAPI
+        .get(process.env.VUE_APP_API_URL+"/ticket/user/"+this.jwt_decode.sub)
         .then(response => {
-          this.suporteTicketList = response.data;
-          this.suporteTicketLoadingTable = false;
+          this.ticket.list = response.data;
+          this.ticket.loading = false;
         });
+    },
+    saveSuportTicket(){
+      this.ticket.form.user_id = this.jwt_decode.sub
+      this.$axiosAPI
+        .post(process.env.VUE_APP_API_URL+"/ticket",this.ticket.form)
+        .then(response => {
+          this.snackbarText = "Salvo com sucesso!"
+          this.snackbar = true
+          this.clearForm(this.ticket.form)
+          this.getSuportTicket
+        })
     }
   },
 
   created() {
-    this.getSuporteTicket();
+    this.getRole()
+    this.getSuportTicket();
   }
 };
 </script>
