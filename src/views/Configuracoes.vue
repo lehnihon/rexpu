@@ -165,6 +165,7 @@
     },
     
     mounted () {
+      this.getRole()
       this.getConfiguracoes()
     }
   }

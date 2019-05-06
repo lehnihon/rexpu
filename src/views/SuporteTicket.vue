@@ -21,14 +21,21 @@
                   ></v-text-field>
                 </v-flex>
                 <v-flex xs12>
-                  <v-data-table disable-initial-sort :headers="ticket.headers" :items="ticket.list" :search="ticket.search" :loading="ticket.loading">
+                  <v-data-table
+                    disable-initial-sort
+                    :headers="ticket.headers"
+                    :items="ticket.list"
+                    :search="ticket.search"
+                    :loading="ticket.loading"
+                  >
                     <template v-slot:items="props">
                       <td>{{ props.item.id }}</td>
                       <td>{{ props.item.title }}</td>
                       <td>{{ props.item.created_at }}</td>
                       <td>
-                        <v-icon class="mr-2">search</v-icon>
-                        <v-icon>edit</v-icon>
+                        <v-btn small fab flat @click="showDetails(props.item)">
+                          <v-icon class="mr-2">search</v-icon>
+                        </v-btn>
                       </td>
                     </template>
                     <v-alert
@@ -48,29 +55,83 @@
             <v-card-title primary-title>
               <h3 class="headline mb-0">Cadastro de Ticket</h3>
             </v-card-title>
-            <v-btn flat fab color="primary" style="position:absolute; right:0; top:0" @click="ticket.new = false">
+            <v-btn
+              flat
+              fab
+              color="primary"
+              style="position:absolute; right:0; top:0"
+              @click="ticket.new = false"
+            >
               <v-icon>close</v-icon>
             </v-btn>
 
             <v-card-text>
               <v-layout row wrap>
                 <v-flex xs12>
-                  <v-text-field
-                    label="Título"
-                    v-model="ticket.form.title"
-                  ></v-text-field>
+                  <v-text-field label="Título" v-model="ticket.form.title"></v-text-field>
                 </v-flex>
                 <v-flex xs12>
-                  <v-textarea
-                  label="Descrição"
-                  v-model="ticket.form.description"
-                ></v-textarea>
+                  <v-textarea label="Descrição" v-model="ticket.form.description"></v-textarea>
                 </v-flex>
               </v-layout>
             </v-card-text>
             <v-card-actions>
               <v-btn @click="saveSuportTicket" depressed color="primary">Gravar</v-btn>
             </v-card-actions>
+          </v-card>
+        </v-flex>
+        <v-flex md12 v-show="ticketDetails.new">
+          <v-card height="100%">
+            <v-card-title primary-title>
+              <h3 class="headline mb-0">Ticket</h3>
+            </v-card-title>
+            <v-btn
+              flat
+              fab
+              color="primary"
+              style="position:absolute; right:0; top:0"
+              @click="ticketDetails.new = false"
+            >
+              <v-icon>close</v-icon>
+            </v-btn>
+
+            <v-card-text>
+              <v-layout row wrap>
+                <v-flex xs12>
+                  <span>{{ticketDetails.item.title}}</span>
+                  <br>
+                  <span>{{ticketDetails.item.description}}</span>
+                </v-flex>
+                <v-flex xs12>
+                  <v-textarea label="Resposta" v-model="ticketDetails.form.obs"></v-textarea>
+                </v-flex>
+                <v-flex xs12>
+                  <v-btn
+                    @click="saveSuportTicketObs(ticketDetails.item.id)"
+                    depressed
+                    color="primary"
+                  >Responder</v-btn>
+                </v-flex>
+                <v-flex xs12>
+                  <v-list two-line>
+                    <template v-for="(item) in ticketDetails.list">
+                  
+                      <v-list-tile :key="item.obs" avatar>
+                        <v-list-tile-avatar>
+                          <img :src="item.obs">
+                        </v-list-tile-avatar>
+
+                        <v-list-tile-content>
+                          <v-list-tile-title v-html="item.obs"></v-list-tile-title>
+                        </v-list-tile-content>
+                        
+                      </v-list-tile>
+                      
+                    </template>
+                  </v-list>
+                </v-flex>
+              </v-layout>
+            </v-card-text>
           </v-card>
         </v-flex>
       </v-layout>
@@ -94,53 +155,87 @@ export default {
   data: () => ({
     snackbar: false,
     snackbarText: "",
-    role:{
-      list:[],
-      obj:{}
-    },
-    ticket:{
+    ticket: {
       headers: [
         { text: "ID", value: "id" },
         { text: "Título", value: "title" },
         { text: "Data", value: "created_at" },
         { text: "Ações", sortable: false }
       ],
-      list:[],
-      search:'',
-      new:false,
-      loading:true,
-      form:{
-        title:'',
-        description:'',
-        user_id:''
+      list: [],
+      search: "",
+      new: false,
+      loading: true,
+      form: {
+        title: "",
+        description: "",
+        user_id: ""
       }
     },
-    jwt_decode: ''
+    ticketDetails: {
+      new: false,
+      item: {
+        title: "",
+        description: "",
+        user_id: ""
+      },
+      list: [],
+      form: {
+        obs: "",
+        ticket_id: ""
+      }
+    }
   }),
   methods: {
     getSuportTicket() {
       this.$axiosAPI
-        .get(process.env.VUE_APP_API_URL+"/ticket/user/"+this.jwt_decode.sub)
+        .get(
+          process.env.VUE_APP_API_URL + "/ticket/user/" + this.jwt_decode.sub
+        )
         .then(response => {
           this.ticket.list = response.data;
           this.ticket.loading = false;
         });
     },
-    saveSuportTicket(){
-      this.ticket.form.user_id = this.jwt_decode.sub
+    getSuportTicketObs(ticket) {
       this.$axiosAPI
-        .post(process.env.VUE_APP_API_URL+"/ticket",this.ticket.form)
+        .get(process.env.VUE_APP_API_URL + "/ticket-obs/ticket/" + ticket)
         .then(response => {
-          this.snackbarText = "Salvo com sucesso!"
-          this.snackbar = true
-          this.clearForm(this.ticket.form)
-          this.getSuportTicket
-        })
+          this.ticketDetails.list = response.data;
+          this.ticketDetails.loading = false;
+        });
+    },
+    saveSuportTicket() {
+      this.ticket.form.user_id = this.jwt_decode.sub;
+      this.$axiosAPI
+        .post(process.env.VUE_APP_API_URL + "/ticket", this.ticket.form)
+        .then(response => {
+          this.snackbarText = "Salvo com sucesso!";
+          this.snackbar = true;
+          this.clearForm(this.ticket.form);
+          this.getSuportTicket();
+        });
+    },
+    saveSuportTicketObs(ticket) {
+      this.ticketDetails.form.ticket_id = ticket;
+      this.$axiosAPI
+        .post(process.env.VUE_APP_API_URL + "/ticket-obs", this.ticketDetails.form)
+        .then(response => {
+          this.snackbarText = "Salvo com sucesso!";
+          this.snackbar = true;
+          this.clearForm(this.ticketDetails.form);
+          this.getSuportTicketObs(ticket);
+        });
+    },
+    showDetails(ticket) {
+      this.ticketDetails.new = true;
+      this.ticketDetails.item = ticket;
+      this.getSuportTicketObs(ticket.id);
     }
   },
 
   created() {
-    this.getRole()
+    this.getRole();
     this.getSuportTicket();
   }
 };

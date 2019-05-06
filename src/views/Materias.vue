@@ -94,7 +94,7 @@
             <v-card-title primary-title>
               <h3 class="headline mb-0">Cadastro de Sugestão</h3>
             </v-card-title>
-            <v-btn flat fab color="primary" style="position:absolute; right:0; top:0" @click="novaSugestao = false">
+            <v-btn flat fab color="primary" style="position:absolute; right:0; top:0" @click="suggestion.new = false">
               <v-icon>close</v-icon>
             </v-btn>
 
@@ -185,17 +185,13 @@
 
 <script>
 import axios from "axios";
-import mixin from "../mixin";
+import mixin from '../mixin'
 export default {
   components: {},
   mixins: [mixin],
   data: () => ({
     snackbar: false,
     snackbarText: '',
-    role:{
-      list:[],
-      obj:{}
-    },
     linkAtual: '',
     linkModal: false,
     linkLoading:false,
@@ -234,8 +230,7 @@ export default {
         user_id:'',
         suggestion_id:'',
       }
-    },
-    jwt_decode:''
+    }
   }),
   methods: {
     getMaterias(){

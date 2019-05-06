@@ -19,7 +19,7 @@
             <img src="https://randomuser.me/api/portraits/men/85.jpg">
           </v-list-tile-avatar>
           <v-list-tile-content class="white--text">
-            <v-list-tile-title>John Leider</v-list-tile-title>
+            <v-list-tile-title>{{this.jwt_decode.name}}</v-list-tile-title>
           </v-list-tile-content>
         </v-list-tile>
       </v-list>
@@ -40,7 +40,9 @@
 
 <script>
 import { mapActions } from 'vuex';
+import mixin from '../mixin'
 export default {
+  mixins: [mixin],
   data() {
     return {
       mini: true,
@@ -61,6 +63,9 @@ export default {
     ...mapActions([
       'logout'
     ])
+  },
+  created(){
+    this.getRole()
   }
 };
 </script>
