@@ -83,7 +83,7 @@
         <v-flex md12 v-show="ticketDetails.new">
           <v-card height="100%">
             <v-card-title primary-title>
-              <h3 class="headline mb-0">Ticket</h3>
+              <h3 class="headline mb-0">{{ticketDetails.item.title}}</h3>
             </v-card-title>
             <v-btn
               flat
@@ -98,8 +98,6 @@
             <v-card-text>
               <v-layout row wrap>
                 <v-flex xs12>
-                  <span>{{ticketDetails.item.title}}</span>
-                  <br>
                   <span>{{ticketDetails.item.description}}</span>
                 </v-flex>
                 <v-flex xs12>
@@ -182,7 +180,8 @@ export default {
       list: [],
       form: {
         obs: "",
-        ticket_id: ""
+        ticket_id: "",
+        user_id:""
       }
     }
   }),
@@ -218,6 +217,7 @@ export default {
     },
     saveSuportTicketObs(ticket) {
       this.ticketDetails.form.ticket_id = ticket;
+      this.ticketDetails.form.user_id = this.jwt_decode.sub;
       this.$axiosAPI
         .post(process.env.VUE_APP_API_URL + "/ticket-obs", this.ticketDetails.form)
         .then(response => {
