@@ -3,6 +3,7 @@ import Router from 'vue-router'
 import store from './store';
 import Login from './views/Login'
 import Painel from './views/Painel'
+import CPM from './views/CPM'
 import Membros from './views/Membros'
 import Materias from './views/Materias'
 import Relatorios from './views/Relatorios'
@@ -27,6 +28,11 @@ const router =  new Router({
       path: '/login',
       name: 'login',
       component: Login
+    },
+    {
+      path: '/cpm',
+      name: 'cpm',
+      component: CPM
     },
     {
       path: '/membros',

@@ -24,12 +24,9 @@
                   <v-data-table disable-initial-sort :headers="cpm.headers" :items="cpm.list" :search="cpm.search" :loading="cpm.loading">
                     <template v-slot:items="props">
                       <td>{{ props.item.id }}</td>
-                      <td>{{ props.item.title }}</td>
+                      <td>{{ props.item.role.role }}</td>
                       <td>R${{ props.item.amount }}</td>
-                      <td>
-                        <v-icon class="mr-2">search</v-icon>
-                        <v-icon>edit</v-icon>
-                      </td>
+                      <td>{{ props.item.created_at }}</td>
                     </template>
                     <v-alert
                       v-slot:no-results
@@ -46,7 +43,7 @@
         <v-flex md6 v-show="cpm.new">
           <v-card height="100%">
             <v-card-title primary-title>
-              <h3 class="headline mb-0">Solicitar Saque</h3>
+              <h3 class="headline mb-0">Cadastrar CPM</h3>
             </v-card-title>
             <v-btn flat fab color="primary" style="position:absolute; right:0; top:0" @click="cpm.new = false">
               <v-icon>close</v-icon>
@@ -55,8 +52,19 @@
             <v-card-text>
               <v-layout row wrap>
                 <v-flex xs12>
+                  <v-select
+                    v-model="cpm.form.role_id"
+                    :rules="[v => !!v || 'Tipo é obrigatório']"
+                    :items="cpm.tipos" 
+                    item-text="text" 
+                    item-value="id"
+                    label="Tipo"
+                  ></v-select>
+                </v-flex>
+                <v-flex xs12>
                   <v-text-field
                     label="Valor"
+                    :rules="[v => !!v || 'Valor é obrigatório']"
                     prefix="R$"
                     :mask="cpm.maskamount"
                     v-model="cpm.form.amount"
@@ -71,7 +79,7 @@
         </v-flex>
       </v-layout>
     </v-container>
-    <v-btn color="primary" dark fixed bottom right fab @click="cpm..new = true">
+    <v-btn color="primary" dark fixed bottom right fab @click="cpm.new = true">
       <v-icon>add</v-icon>
     </v-btn>
     <v-snackbar v-model="snackbar" bottom>
@@ -94,21 +102,21 @@ export default {
     cpm:{
       headers: [
         { text: "ID", value: "id" },
-        { text: "Título", value: "question" },
+        { text: "Tipo", value: "question" },
         { text: "Valor", value: "amount" },
-        { text: "Ações", sortable: false }
+        { text: "Data", value: "created_at" }
       ],
       list:[],
       search:'',
       new:false,
       maskamount:'##########',
+      tipos:[
+        {id:2,text:'Publisher'},
+        {id:3,text:'Redator'}
+      ],
       form:{
-        title:'',
+        role_id:'',
         amount:'',
-        done:false,
-        error:false,
-        error_obs:'',
-        user_id:''
       },
       loading:true
     }

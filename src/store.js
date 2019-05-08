@@ -79,7 +79,7 @@ export default new Vuex.Store({
           commit('updateAccessTokenWP', btoa(response.data.wp_login+":"+response.data.wp_password));
           commit('updateUserWP', response.data.wp_user);
         })
-        router.push('/configuracoes');
+        router.push('/');
     },
     fetchAccessToken({ commit }) {
       commit('updateAccessToken', localStorage.getItem('accessToken'));

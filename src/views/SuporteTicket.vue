@@ -112,19 +112,17 @@
                 </v-flex>
                 <v-flex xs12>
                   <v-list two-line>
-                    <template v-for="(item) in ticketDetails.list">
-                  
+                    <template v-for="(item,index) in ticketDetails.list">
                       <v-list-tile :key="item.obs" avatar>
-                        <v-list-tile-avatar>
-                          <img :src="item.obs">
+                        <v-list-tile-avatar class="pr-5 text-xs-left">
+                          {{item.ticket.user.name}}
                         </v-list-tile-avatar>
 
                         <v-list-tile-content>
                           <v-list-tile-title v-html="item.obs"></v-list-tile-title>
                         </v-list-tile-content>
-                        
                       </v-list-tile>
-                      
+                      <v-divider v-if="(ticketDetails.list.length-1) != index" :key="index" inset></v-divider>
                     </template>
                   </v-list>
                 </v-flex>

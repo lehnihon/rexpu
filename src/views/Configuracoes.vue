@@ -3,6 +3,32 @@
     <h1 class="subheading grey--text mx-4">Configurações</h1>
     <v-container grid-list-md>
       <v-layout row wrap>
+        <v-flex md12>
+          <v-card height="100%">
+            <v-card-title primary-title>
+              <h3 class="headline mb-0">Configurações Gerais</h3>
+            </v-card-title>
+
+            <v-card-text>
+              <v-layout row wrap>
+                <v-flex md6>
+                  <v-text-field
+                    label="% Indicação"
+                    v-model="config.perc_member"
+                    loading:="config.loading"
+                    mask="###"
+                  ></v-text-field>
+                </v-flex>
+                <v-flex md6>
+                </v-flex>
+              </v-layout>
+            </v-card-text>
+
+            <v-card-actions>
+              <v-btn @click="saveConfigurations" depressed color="primary">Gravar</v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-flex>
         <v-flex md6>
           <v-card height="100%">
             <v-card-title primary-title>
@@ -14,22 +40,22 @@
                 <v-flex xs12>
                   <v-text-field
                     label="Wordpress ID"
-                    v-model="m_wp_user"
-                    loading:="loading"
+                    v-model="user.wp_user"
+                    loading:="user.loading"
                   ></v-text-field>
                 </v-flex>
                 <v-flex xs12>
                   <v-text-field
                     label="Wordpress Login"
-                    v-model="m_wp_login"
-                    loading:="loading"
+                    v-model="user.wp_login"
+                    loading:="user.loading"
                   ></v-text-field>
                 </v-flex>
                 <v-flex xs12>
                   <v-text-field
                     label="Wordpress Senha"
-                    v-model="m_wp_password"
-                    loading:="loading"
+                    v-model="user.wp_password"
+                    loading:="user.loading"
                   ></v-text-field>
                 </v-flex>
               </v-layout>
@@ -53,36 +79,36 @@
                 <v-flex xs12>
                   <v-text-field
                     label="Banco"
-                    v-model="m_bank"
-                    loading:="loading"
+                    v-model="user.bank"
+                    loading:="user.loading"
                   ></v-text-field>
                 </v-flex>
                 <v-flex xs12>
                   <v-text-field
                     label="Agência"
-                    v-model="m_agency"
-                    loading:="loading"
+                    v-model="user.agency"
+                    loading:="user.loading"
                   ></v-text-field>
                 </v-flex>
                 <v-flex xs12>
                   <v-text-field
                     label="Conta"
-                    v-model="m_account"
-                    loading:="loading"
+                    v-model="user.account"
+                    loading:="user.loading"
                   ></v-text-field>
                 </v-flex>
                 <v-flex xs12>
                   <v-text-field
                     label="CPF"
-                    v-model="m_cpf"
-                    loading:="loading"
+                    v-model="user.cpf"
+                    loading:="user.loading"
                   ></v-text-field>
                 </v-flex>
               </v-layout>
             </v-card-text>
 
             <v-card-actions>
-              <v-btn @click="gravarWP" depressed color="primary">Gravar</v-btn>
+              <v-btn @click="saveWP" depressed color="primary">Gravar</v-btn>
             </v-card-actions>
           </v-card>
         </v-flex>
@@ -106,56 +132,78 @@
 
 <script>
   import axios from 'axios'
-  import router from '../router';
   import mixin from '../mixin'
   export default {
     components: {
     },
     mixins: [mixin],
     data: () => ({
-      response: false,
-      headers: null,
-      m_wp_user:'',
-      m_wp_login:'',
-      m_wp_password:'',
-      m_bank:'',
-      m_agency:'',
-      m_account:'',
-      m_cpf:'',
-      loading: true,
-      user_id: '',
-      jwt_decode: '',
+      user:{
+        wp_user:'',
+        wp_login:'',
+        wp_password:'',
+        bank:'',
+        agency:'',
+        account:'',
+        cpf:'',
+        loading: true,
+        id: '',
+      },
+      config:{
+        perc_member:'',
+        loading: true,
+      },
       snackbar: false,
       snackbarText: '',
     }),
     methods: {
-      getConfiguracoes(){
+      getUser(){
         this.$axiosAPI
-          .get(process.env.VUE_APP_API_URL+"/config")
+          .get(process.env.VUE_APP_API_URL+"/user/"+this.jwt_decode.sub)
           .then(response => {
-            this.m_wp_user = response.data.wp_user
-            this.m_wp_login = response.data.wp_login
-            this.m_wp_password = response.data.wp_password
-            this.m_bank = response.data.bank
-            this.m_agency = response.data.agency
-            this.m_account = response.data.account
-            this.m_cpf = response.data.cpf
-            this.loading = false
+            this.user.wp_user = response.data.wp_user
+            this.user.wp_login = response.data.wp_login
+            this.user.wp_password = response.data.wp_password
+            this.user.bank = response.data.bank
+            this.user.agency = response.data.agency
+            this.user.account = response.data.account
+            this.user.cpf = response.data.cpf
+            this.user.loading = false
           }).catch(function (error) {
             
           })
       },
-      gravarWP(){
+      getConfigurations(){
         this.$axiosAPI
-          .put(process.env.VUE_APP_API_URL+"/config",{
-            user_id: this.jwt_decode.sub,
-            wp_user: this.m_wp_user,
-            wp_login:this.m_wp_login,
-            wp_password:this.m_wp_password,
-            bank:this.m_bank,
-            agency:this.m_agency,
-            account:this.m_account,
-            cpf:this.m_cpf
+          .get(process.env.VUE_APP_API_URL+"/general-config")
+          .then(response => {
+            this.config.perc_member = response.data.perc_member
+            this.user.loading = false
+          }).catch(function (error) {
+            
+          })
+      },
+      saveUser(){
+        this.$axiosAPI
+          .put(process.env.VUE_APP_API_URL+"/user",{
+            id: this.jwt_decode.sub,
+            wp_user: this.user.wp_user,
+            wp_login:this.user.wp_login,
+            wp_password:this.user.wp_password,
+            bank:this.user.bank,
+            agency:this.user.agency,
+            account:this.user.account,
+            cpf:this.user.cpf
+          })
+          .then(response => {
+            this.snackbarText = "Salvo com sucesso!"
+            this.snackbar = true
+          })
+      },
+      saveConfigurations(){
+        this.$axiosAPI
+          .put(process.env.VUE_APP_API_URL+"/general-config",{
+            perc_member: this.config.perc_member,
           })
           .then(response => {
             this.snackbarText = "Salvo com sucesso!"
@@ -166,7 +214,8 @@
     
     mounted () {
       this.getRole()
-      this.getConfiguracoes()
+      this.getUser()
+      this.getConfigurations()
     }
   }
 </script>

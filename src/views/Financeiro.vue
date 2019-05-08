@@ -58,7 +58,7 @@
                   <v-text-field
                     label="Valor"
                     prefix="R$"
-                    :mask="financial.maskamount"
+                    mask="##########"
                     v-model="financial.form.amount"
                   ></v-text-field>
                 </v-flex>
@@ -101,7 +101,6 @@ export default {
       list:[],
       search:'',
       new:false,
-      maskamount:'##########',
       form:{
         title:'',
         amount:'',

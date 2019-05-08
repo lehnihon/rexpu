@@ -49,12 +49,13 @@ export default {
       drawer:false,
       links:[
           { icon: 'dashboard', text: 'Painel', route: '/' },
+          { icon: 'attach_money', text: 'CPM', route: '/cpm' },
           { icon: 'person_pin', text: 'Membros', route: '/membros' },
           { icon: 'computer', text: 'Matérias', route: '/materias' },
           { icon: 'assignment', text: 'Relatórios', route: '/relatorios' },
           { icon: 'question_answer', text: 'Suporte/Ticket', route: '/suporte-ticket' },
           { icon: 'help_outline', text: 'Dúvidas Frequentes', route: '/duvidas-frequentes' },
-          { icon: 'monetization_on', text: 'Financeiro', route: '/financeiro' },
+          { icon: 'credit_card', text: 'Financeiro', route: '/financeiro' },
           { icon: 'build', text: 'Configurações', route: '/configuracoes' },
       ]
     };
