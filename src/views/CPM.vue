@@ -73,7 +73,7 @@
               </v-layout>
             </v-card-text>
             <v-card-actions>
-              <v-btn @click="saveCPM" depressed color="primary">Solicitar</v-btn>
+              <v-btn @click="saveCPM" depressed color="primary">Gravar</v-btn>
             </v-card-actions>
           </v-card>
         </v-flex>
