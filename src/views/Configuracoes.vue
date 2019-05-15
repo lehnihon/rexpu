@@ -15,7 +15,7 @@
                   <v-text-field
                     label="% Indicação"
                     v-model="config.perc_member"
-                    loading:="config.loading"
+                    :loading="config.loading"
                     mask="###"
                   ></v-text-field>
                 </v-flex>
@@ -41,28 +41,28 @@
                   <v-text-field
                     label="Wordpress ID"
                     v-model="user.wp_user"
-                    loading:="user.loading"
+                    :loading="user.loading"
                   ></v-text-field>
                 </v-flex>
                 <v-flex xs12>
                   <v-text-field
                     label="Wordpress Login"
                     v-model="user.wp_login"
-                    loading:="user.loading"
+                    :loading="user.loading"
                   ></v-text-field>
                 </v-flex>
                 <v-flex xs12>
                   <v-text-field
                     label="Wordpress Senha"
                     v-model="user.wp_password"
-                    loading:="user.loading"
+                    :loading="user.loading"
                   ></v-text-field>
                 </v-flex>
               </v-layout>
             </v-card-text>
 
             <v-card-actions>
-              <v-btn @click="gravarWP" depressed color="primary">Gravar</v-btn>
+              <v-btn @click="saveUser" depressed color="primary">Gravar</v-btn>
             </v-card-actions>
           </v-card>
         </v-flex>
@@ -80,35 +80,35 @@
                   <v-text-field
                     label="Banco"
                     v-model="user.bank"
-                    loading:="user.loading"
+                    :loading="user.loading"
                   ></v-text-field>
                 </v-flex>
                 <v-flex xs12>
                   <v-text-field
                     label="Agência"
                     v-model="user.agency"
-                    loading:="user.loading"
+                    :loading="user.loading"
                   ></v-text-field>
                 </v-flex>
                 <v-flex xs12>
                   <v-text-field
                     label="Conta"
                     v-model="user.account"
-                    loading:="user.loading"
+                    :loading="user.loading"
                   ></v-text-field>
                 </v-flex>
                 <v-flex xs12>
                   <v-text-field
                     label="CPF"
                     v-model="user.cpf"
-                    loading:="user.loading"
+                    :loading="user.loading"
                   ></v-text-field>
                 </v-flex>
               </v-layout>
             </v-card-text>
 
             <v-card-actions>
-              <v-btn @click="saveWP" depressed color="primary">Gravar</v-btn>
+              <v-btn @click="saveUser" depressed color="primary">Gravar</v-btn>
             </v-card-actions>
           </v-card>
         </v-flex>
@@ -117,6 +117,7 @@
     <v-snackbar
       v-model="snackbar"
       bottom
+      :timeout=1000
     >
       {{ snackbarText }}
       <v-btn
@@ -178,7 +179,7 @@
           .get(process.env.VUE_APP_API_URL+"/general-config")
           .then(response => {
             this.config.perc_member = response.data.perc_member
-            this.user.loading = false
+            this.config.loading = false
           }).catch(function (error) {
             
           })

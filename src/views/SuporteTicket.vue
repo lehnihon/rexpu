@@ -111,18 +111,18 @@
                   >Responder</v-btn>
                 </v-flex>
                 <v-flex xs12>
-                  <v-list two-line>
+                  <v-list>
                     <template v-for="(item,index) in ticketDetails.list">
-                      <v-list-tile :key="item.obs" avatar>
-                        <v-list-tile-avatar class="pr-5 text-xs-left">
+                      <v-layout row wrap :key="item.obs">
+                        <v-flex xs12 class="font-weight-bold mr-3">
                           {{item.ticket.user.name}}
-                        </v-list-tile-avatar>
+                        </v-flex>
 
-                        <v-list-tile-content>
-                          <v-list-tile-title v-html="item.obs"></v-list-tile-title>
-                        </v-list-tile-content>
-                      </v-list-tile>
-                      <v-divider v-if="(ticketDetails.list.length-1) != index" :key="index" inset></v-divider>
+                        <v-flex xs12>
+                          {{item.obs}}
+                        </v-flex>
+                      </v-layout>
+                      <v-divider class="my-2" v-if="(ticketDetails.list.length-1) != index" :key="index" inset></v-divider>
                     </template>
                   </v-list>
                 </v-flex>
@@ -135,7 +135,7 @@
     <v-btn color="primary" dark fixed bottom right fab @click="ticket.new = true">
       <v-icon>add</v-icon>
     </v-btn>
-    <v-snackbar v-model="snackbar" bottom>
+    <v-snackbar v-model="snackbar" bottom :timeout=1000>
       {{ snackbarText }}
       <v-btn color="pink" flat @click="snackbar = false">Close</v-btn>
     </v-snackbar>

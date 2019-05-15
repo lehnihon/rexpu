@@ -176,7 +176,7 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-    <v-snackbar v-model="snackbar" bottom>
+    <v-snackbar v-model="snackbar" bottom :timeout=1000>
       {{ snackbarText }}
       <v-btn color="pink" flat @click="snackbar = false">Close</v-btn>
     </v-snackbar>

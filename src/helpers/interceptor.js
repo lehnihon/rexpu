@@ -37,6 +37,8 @@ export default function setup() {
         if(error.response != undefined){
             if(error.response.status == '401'){
                 store.dispatch('logout');
+            }else{
+                return Promise.reject(error);
             }
         }
       });
