@@ -43,37 +43,50 @@
         </v-flex>
         <v-flex md6 v-show="member.new" ref="memberForm">
           <v-card height="100%">
-            <v-card-title primary-title>
-              <h3 class="headline mb-0">Cadastro de Membros</h3>
-            </v-card-title>
-            <v-btn flat fab color="primary" style="position:absolute; right:0; top:0" @click="member.new = false">
-              <v-icon>close</v-icon>
-            </v-btn>
+            <v-toolbar dark color="primary">
+              <v-toolbar-title>Cadastro de Membros</v-toolbar-title>
+              <v-spacer></v-spacer>
+              <v-btn icon dark @click="member.new = false">
+                <v-icon>close</v-icon>
+              </v-btn>
+            </v-toolbar>
 
             <v-card-text>
-              <v-layout row wrap>
-                <v-flex xs12>
-                  <v-text-field
-                    label="Nome"
-                    v-model="member.form.name"
+              <v-form
+                ref="member"
+                v-model="member.valid"
+                lazy-validation
+              >
+                <v-layout row wrap>
+                  <v-flex xs12>
+                    <v-text-field
+                      label="Nome"
+                      v-model="member.form.name"
+                      :rules="[v => !!v || 'Nome é obrigatório']"
+                    ></v-text-field>
+                  </v-flex>
+                  <v-flex xs12>
+                    <v-text-field
+                      label="E-mail"
+                      v-model="member.form.email"
+                      :rules="[
+                        v => !!v || 'E-mail is obrigatório',
+                        v => /.+@.+/.test(v) || 'E-mail inválido'
+                      ]"
+                    ></v-text-field>
+                  </v-flex>
+                  <v-flex xs12>
+                    <v-text-field
+                    label="Senha"
+                    v-model="member.form.password"
+                    :rules="[v => !!v || 'Senha é obrigatório']"
                   ></v-text-field>
-                </v-flex>
-                <v-flex xs12>
-                  <v-text-field
-                    label="E-mail"
-                    v-model="member.form.email"
-                  ></v-text-field>
-                </v-flex>
-                <v-flex xs12>
-                  <v-text-field
-                  label="Senha"
-                  v-model="member.form.password"
-                ></v-text-field>
-                </v-flex>
-              </v-layout>
+                  </v-flex>
+                </v-layout>
+              </v-form>
             </v-card-text>
             <v-card-actions>
-              <v-btn @click="saveMember" depressed color="primary">Gravar</v-btn>
+              <v-btn :disabled="!member.valid" @click="saveMember" depressed color="primary">Gravar</v-btn>
             </v-card-actions>
           </v-card>
         </v-flex>
@@ -109,6 +122,7 @@ export default {
       list:[],
       loading:true,
       new:false,
+      valid:true,
       form:{
         name:'',
         email:'',
@@ -135,17 +149,20 @@ export default {
       }, 250);
     },
     saveMember(){
+      if (this.$refs.member.validate()) {
       this.$axiosAPI
         .post(process.env.VUE_APP_API_URL+"/user",this.member.form)
         .then(response => {
           this.snackbarText = "Salvo com sucesso!"
           this.snackbar = true
-          this.clearForm(this.member.form)
+          this.$refs.member.reset()
           this.getMembers()
+          this.member.new = false
         }).catch(function (error) {
           this.snackbarText = "Erro ao gravar!"
           this.snackbar = true   
         })
+      }
     }
   },
   created() {

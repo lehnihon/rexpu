@@ -42,38 +42,45 @@
         </v-flex>
         <v-flex md6 v-show="cpm.new">
           <v-card height="100%">
-            <v-card-title primary-title>
-              <h3 class="headline mb-0">Cadastrar CPM</h3>
-            </v-card-title>
-            <v-btn flat fab color="primary" style="position:absolute; right:0; top:0" @click="cpm.new = false">
-              <v-icon>close</v-icon>
-            </v-btn>
+            <v-toolbar dark color="primary">
+              <v-toolbar-title>Cadastrar CPM</v-toolbar-title>
+              <v-spacer></v-spacer>
+              <v-btn icon dark @click="cpm.new = false">
+                <v-icon>close</v-icon>
+              </v-btn>
+            </v-toolbar>
 
             <v-card-text>
-              <v-layout row wrap>
-                <v-flex xs12>
-                  <v-select
-                    v-model="cpm.form.role_id"
-                    :rules="[v => !!v || 'Tipo é obrigatório']"
-                    :items="cpm.tipos" 
-                    item-text="text" 
-                    item-value="id"
-                    label="Tipo"
-                  ></v-select>
-                </v-flex>
-                <v-flex xs12>
-                  <v-text-field
-                    label="Valor"
-                    :rules="[v => !!v || 'Valor é obrigatório']"
-                    prefix="R$"
-                    :mask="cpm.maskamount"
-                    v-model="cpm.form.amount"
-                  ></v-text-field>
-                </v-flex>
-              </v-layout>
+              <v-form
+                ref="cpm"
+                v-model="cpm.valid"
+                lazy-validation
+              >
+                <v-layout row wrap>
+                  <v-flex xs12>
+                    <v-select
+                      v-model="cpm.form.role_id"
+                      :rules="[v => !!v || 'Tipo é obrigatório']"
+                      :items="cpm.tipos" 
+                      item-text="text" 
+                      item-value="id"
+                      label="Tipo"
+                    ></v-select>
+                  </v-flex>
+                  <v-flex xs12>
+                    <v-text-field
+                      label="Valor"
+                      :rules="[v => !!v || 'Valor é obrigatório']"
+                      prefix="R$"
+                      :mask="cpm.maskamount"
+                      v-model="cpm.form.amount"
+                    ></v-text-field>
+                  </v-flex>
+                </v-layout>
+              </v-form>
             </v-card-text>
             <v-card-actions>
-              <v-btn @click="saveCPM" depressed color="primary">Gravar</v-btn>
+              <v-btn :disabled="!cpm.valid" @click="saveCPM" depressed color="primary">Gravar</v-btn>
             </v-card-actions>
           </v-card>
         </v-flex>
@@ -106,6 +113,7 @@ export default {
         { text: "Valor", value: "amount" },
         { text: "Data", value: "created_at" }
       ],
+      valid:true,
       list:[],
       search:'',
       new:false,
@@ -131,14 +139,17 @@ export default {
         });
     },
     saveCPM(){
-      this.$axiosAPI
-        .post(process.env.VUE_APP_API_URL+"/cpm",this.cpm.form)
-        .then(response => {
-          this.snackbarText = "Salvo com sucesso!"
-          this.snackbar = true
-          this.clearForm(this.cpm.form)
-          this.getCPM()
-        })
+      if (this.$refs.cpm.validate()) {
+        this.$axiosAPI
+          .post(process.env.VUE_APP_API_URL+"/cpm",this.cpm.form)
+          .then(response => {
+            this.snackbarText = "Salvo com sucesso!"
+            this.snackbar = true
+            this.$refs.cpm.reset()
+            this.getCPM()
+            this.cpm.new = false
+          })
+      }
     }
   },
 

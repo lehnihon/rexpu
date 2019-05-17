@@ -52,81 +52,84 @@
         </v-flex>
         <v-flex md6 v-show="ticket.new">
           <v-card height="100%">
-            <v-card-title primary-title>
-              <h3 class="headline mb-0">Cadastro de Ticket</h3>
-            </v-card-title>
-            <v-btn
-              flat
-              fab
-              color="primary"
-              style="position:absolute; right:0; top:0"
-              @click="ticket.new = false"
-            >
-              <v-icon>close</v-icon>
-            </v-btn>
+            <v-toolbar dark color="primary">
+              <v-toolbar-title>Cadastro de Ticket</v-toolbar-title>
+              <v-spacer></v-spacer>
+              <v-btn icon dark @click="ticket.new = false">
+                <v-icon>close</v-icon>
+              </v-btn>
+            </v-toolbar>
 
             <v-card-text>
-              <v-layout row wrap>
-                <v-flex xs12>
-                  <v-text-field label="Título" v-model="ticket.form.title"></v-text-field>
-                </v-flex>
-                <v-flex xs12>
-                  <v-textarea label="Descrição" v-model="ticket.form.description"></v-textarea>
-                </v-flex>
-              </v-layout>
+              <v-form
+                ref="ticket"
+                v-model="ticket.valid"
+                lazy-validation
+              >
+                <v-layout row wrap>
+                  <v-flex xs12>
+                    <v-text-field :rules="[v => !!v || 'Título é obrigatório']" label="Título" v-model="ticket.form.title"></v-text-field>
+                  </v-flex>
+                  <v-flex xs12>
+                    <v-textarea :rules="[v => !!v || 'Descrição é obrigatório']" label="Descrição" v-model="ticket.form.description"></v-textarea>
+                  </v-flex>
+                </v-layout>
+              </v-form>
             </v-card-text>
             <v-card-actions>
-              <v-btn @click="saveSuportTicket" depressed color="primary">Gravar</v-btn>
+              <v-btn :disabled="!ticket.valid" @click="saveSuportTicket" depressed color="primary">Gravar</v-btn>
             </v-card-actions>
           </v-card>
         </v-flex>
         <v-flex md12 v-show="ticketDetails.new">
           <v-card height="100%">
-            <v-card-title primary-title>
-              <h3 class="headline mb-0">{{ticketDetails.item.title}}</h3>
-            </v-card-title>
-            <v-btn
-              flat
-              fab
-              color="primary"
-              style="position:absolute; right:0; top:0"
-              @click="ticketDetails.new = false"
-            >
-              <v-icon>close</v-icon>
-            </v-btn>
+            <v-toolbar dark color="primary">
+              <v-toolbar-title>{{ticketDetails.item.title}}</v-toolbar-title>
+              <v-spacer></v-spacer>
+              <v-btn icon dark @click="ticketDetails.new = false">
+                <v-icon>close</v-icon>
+              </v-btn>
+            </v-toolbar>
 
             <v-card-text>
-              <v-layout row wrap>
-                <v-flex xs12>
-                  <span>{{ticketDetails.item.description}}</span>
-                </v-flex>
-                <v-flex xs12>
-                  <v-textarea label="Resposta" v-model="ticketDetails.form.obs"></v-textarea>
-                </v-flex>
-                <v-flex xs12>
-                  <v-btn
-                    @click="saveSuportTicketObs(ticketDetails.item.id)"
-                    depressed
-                    color="primary"
-                  >Responder</v-btn>
-                </v-flex>
-                <v-flex xs12>
-                  <v-list>
-                    <template v-for="(item,index) in ticketDetails.list">
-                      <v-layout row wrap :key="item.obs">
-                        <v-flex xs12 class="font-weight-bold mr-3">
-                          {{item.ticket.user.name}}
-                        </v-flex>
+              <v-form
+                ref="ticketDetails"
+                v-model="ticketDetails.valid"
+                lazy-validation
+              >
+                <v-layout row wrap>
+                  <v-flex xs12>
+                    <span>{{ticketDetails.item.description}}</span>
+                  </v-flex>
+                  <v-flex xs12>
+                    <v-textarea :rules="[v => !!v || 'Resposta é obrigatório']" label="Resposta" v-model="ticketDetails.form.obs"></v-textarea>
+                  </v-flex>
+                  <v-flex xs12>
+                    <v-btn
+                      :disabled="!ticketDetails.valid"
+                      @click="saveSuportTicketObs(ticketDetails.item.id)"
+                      depressed
+                      color="primary"
+                    >Responder</v-btn>
+                  </v-flex>
+                  <v-flex xs12>
+                    <v-list>
+                      <template v-for="(item,index) in ticketDetails.list">
+                        <v-layout row wrap :key="item.obs">
+                          <v-flex xs12 class="font-weight-bold mr-3">
+                            {{item.ticket.user.name}}
+                          </v-flex>
 
-                        <v-flex xs12>
-                          {{item.obs}}
-                        </v-flex>
-                      </v-layout>
-                      <v-divider class="my-2" v-if="(ticketDetails.list.length-1) != index" :key="index" inset></v-divider>
-                    </template>
-                  </v-list>
-                </v-flex>
-              </v-layout>
+                          <v-flex xs12>
+                            {{item.obs}}
+                          </v-flex>
+                        </v-layout>
+                        <v-divider class="my-2" v-if="(ticketDetails.list.length-1) != index" :key="index" inset></v-divider>
+                      </template>
+                    </v-list>
+                  </v-flex>
+                </v-layout>
+              </v-form>
             </v-card-text>
           </v-card>
         </v-flex>
@@ -162,6 +165,7 @@ export default {
       search: "",
       new: false,
       loading: true,
+      valid:true,
       form: {
         title: "",
         description: "",
@@ -176,6 +180,7 @@ export default {
         user_id: ""
       },
       list: [],
+      valid:true,
       form: {
         obs: "",
         ticket_id: "",
@@ -203,27 +208,32 @@ export default {
         });
     },
     saveSuportTicket() {
-      this.ticket.form.user_id = this.jwt_decode.sub;
-      this.$axiosAPI
-        .post(process.env.VUE_APP_API_URL + "/ticket", this.ticket.form)
-        .then(response => {
-          this.snackbarText = "Salvo com sucesso!";
-          this.snackbar = true;
-          this.clearForm(this.ticket.form);
-          this.getSuportTicket();
-        });
+      if (this.$refs.ticket.validate()) {
+        this.ticket.form.user_id = this.jwt_decode.sub;
+        this.$axiosAPI
+          .post(process.env.VUE_APP_API_URL + "/ticket", this.ticket.form)
+          .then(response => {
+            this.snackbarText = "Salvo com sucesso!";
+            this.snackbar = true;
+            this.$refs.ticket.reset()
+            this.getSuportTicket();
+            this.ticket.new = false
+          });
+      }
     },
     saveSuportTicketObs(ticket) {
-      this.ticketDetails.form.ticket_id = ticket;
-      this.ticketDetails.form.user_id = this.jwt_decode.sub;
-      this.$axiosAPI
-        .post(process.env.VUE_APP_API_URL + "/ticket-obs", this.ticketDetails.form)
-        .then(response => {
-          this.snackbarText = "Salvo com sucesso!";
-          this.snackbar = true;
-          this.clearForm(this.ticketDetails.form);
-          this.getSuportTicketObs(ticket);
-        });
+      if (this.$refs.ticketDetails.validate()) {
+        this.ticketDetails.form.ticket_id = ticket;
+        this.ticketDetails.form.user_id = this.jwt_decode.sub;
+        this.$axiosAPI
+          .post(process.env.VUE_APP_API_URL + "/ticket-obs", this.ticketDetails.form)
+          .then(response => {
+            this.snackbarText = "Salvo com sucesso!";
+            this.snackbar = true;
+            this.$refs.ticketDetails.reset()
+            this.getSuportTicketObs(ticket);
+          });
+      }
     },
     showDetails(ticket) {
       this.ticketDetails.new = true;

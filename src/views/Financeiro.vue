@@ -142,16 +142,9 @@
       {{ snackbarText }}
       <v-btn color="pink" flat @click="snackbar = false">Close</v-btn>
     </v-snackbar>
-    <v-dialog v-model="dialog" fullscreen hide-overlay transition="dialog-bottom-transition">
+    
+    <v-dialog v-model="dialog" width="500">
       <v-card>
-        <v-toolbar dark color="primary">
-          
-          <v-toolbar-title>Detalhes</v-toolbar-title>
-          <v-spacer></v-spacer>
-          <v-btn icon dark @click="dialog = false">
-            <v-icon>close</v-icon>
-          </v-btn>
-        </v-toolbar>
         <v-list>
           <v-list-tile avatar>  
             <v-list-tile-action class="headline mr-3">

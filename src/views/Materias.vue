@@ -21,13 +21,13 @@
                   ></v-text-field>
                 </v-flex>
                 <v-flex xs12>
-                  <v-data-table :headers="subject.headers" :items="subject.list" :search="subject.search" :loading="subject.loading">
+                  <v-data-table disable-initial-sort :headers="subject.headers" :items="subject.list" :search="subject.search" :loading="subject.loading">
                     <template v-slot:items="props">
                       <td>{{ props.item.id }}</td>
                       <td>{{ props.item.title }}</td>
                       <td>{{ props.item.created_at }}</td>
                       <td>
-                        <v-btn :loading="linkLoading" small fab flat @click="gerarLink(props.item.link)">
+                        <v-btn :loading="linkLoading" small fab flat @click="generateLink(props.item.link)">
                           <v-icon> 
                             insert_link
                           </v-icon>
@@ -64,13 +64,13 @@
                   ></v-text-field>
                 </v-flex>
                 <v-flex xs12>
-                  <v-data-table :headers="suggestion.headers" :items="suggestion.list" :search="suggestion.search" :loading="suggestion.loading">
+                  <v-data-table disable-initial-sort :headers="suggestion.headers" :items="suggestion.list" :search="suggestion.search" :loading="suggestion.loading">
                     <template v-slot:items="props">
                       <td>{{ props.item.id }}</td>
                       <td>{{ props.item.title }}</td>
                       <td>{{ props.item.link }}</td>
                       <td>
-                        <v-btn class="mx-0" small fab flat @click="mostrarMateria(props.item.id)" v-if="(role.list.includes(1) || role.list.includes(2))">
+                        <v-btn class="mx-0" small fab flat @click="showSubject(props.item.id)" v-if="(role.list.includes(1) || role.list.includes(2))">
                           <v-icon> 
                             computer
                           </v-icon>
@@ -91,79 +91,97 @@
         </v-flex>
         <v-flex md6 v-show="suggestion.new" ref="sugestaoForm">
           <v-card height="100%">
-            <v-card-title primary-title>
-              <h3 class="headline mb-0">Cadastro de Sugestão</h3>
-            </v-card-title>
-            <v-btn flat fab color="primary" style="position:absolute; right:0; top:0" @click="suggestion.new = false">
-              <v-icon>close</v-icon>
-            </v-btn>
+            <v-toolbar dark color="primary">
+              <v-toolbar-title>Cadastro de Sugestão</v-toolbar-title>
+              <v-spacer></v-spacer>
+              <v-btn icon dark @click="suggestion.new = false">
+                <v-icon>close</v-icon>
+              </v-btn>
+            </v-toolbar>
 
             <v-card-text>
-              <v-layout row wrap>
-                <v-flex xs12>
-                  <v-text-field
-                    label="Título"
-                    v-model="suggestion.form.title"
-                  ></v-text-field>
-                </v-flex>
-                <v-flex xs12>
-                  <v-text-field
-                    label="Link sugestão"
-                    v-model="suggestion.form.link"
-                  ></v-text-field>
-                </v-flex>
-                <v-flex xs12>
-                  <v-textarea
-                  label="Descrição"
-                  v-model="suggestion.form.description"
-                ></v-textarea>
-                </v-flex>
-              </v-layout>
+              <v-form
+                ref="suggestion"
+                v-model="suggestion.valid"
+                lazy-validation
+              >
+                <v-layout row wrap>
+                  <v-flex xs12>
+                    <v-text-field
+                      label="Título"
+                      v-model="suggestion.form.title"
+                      :rules="[v => !!v || 'Título é obrigatório']"
+                    ></v-text-field>
+                  </v-flex>
+                  <v-flex xs12>
+                    <v-text-field
+                      label="Link sugestão"
+                      v-model="suggestion.form.link"
+                      :rules="[v => !!v || 'Link é obrigatório']"
+                    ></v-text-field>
+                  </v-flex>
+                  <v-flex xs12>
+                    <v-textarea
+                    label="Descrição"
+                    v-model="suggestion.form.description"
+                  ></v-textarea>
+                  </v-flex>
+                </v-layout>
+              </v-form>
             </v-card-text>
             <v-card-actions>
-              <v-btn @click="gravarSugestao" depressed color="primary">Gravar</v-btn>
+              <v-btn :disabled="!suggestion.valid" @click="saveSuggestion" depressed color="primary">Gravar</v-btn>
             </v-card-actions>
           </v-card>
         </v-flex>
         <v-flex md6 v-show="subject.new" ref="materiaForm">
           <v-card height="100%">
-            <v-card-title primary-title>
-              <h3 class="headline mb-0">Cadastro de Matéria</h3>
-            </v-card-title>
-            <v-btn flat fab color="primary" style="position:absolute; right:0; top:0" @click="subject.new = false">
-              <v-icon>close</v-icon>
-            </v-btn>
+            <v-toolbar dark color="primary">
+              <v-toolbar-title>Cadastro de Matéria ID:{{this.subject.form.suggestion_id}}</v-toolbar-title>
+              <v-spacer></v-spacer>
+              <v-btn icon dark @click="subject.new = false">
+                <v-icon>close</v-icon>
+              </v-btn>
+            </v-toolbar>
 
             <v-card-text>
-              <v-layout row wrap>
-                <v-flex xs12>
-                  <v-text-field
-                    label="Título"
-                    v-model="subject.form.title"
-                  ></v-text-field>
-                </v-flex>
-                <v-flex xs12>
-                  <v-text-field
-                    label="Link matéria"
-                    v-model="subject.form.link"
-                  ></v-text-field>
-                </v-flex>
-                <v-flex xs12>
-                  <v-textarea
-                  label="Observações"
-                  v-model="subject.form.obs"
-                ></v-textarea>
-                </v-flex>
-              </v-layout>
+              <v-form
+                ref="subject"
+                v-model="subject.valid"
+                lazy-validation
+              >
+                <v-layout row wrap>
+                  <v-flex xs12>
+                    <v-text-field
+                      label="Título"
+                      v-model="subject.form.title"
+                      :rules="[v => !!v || 'Título é obrigatório']"
+                    ></v-text-field>
+                  </v-flex>
+                  <v-flex xs12>
+                    <v-text-field
+                      label="Link matéria"
+                      v-model="subject.form.link"
+                      :rules="[v => !!v || 'Link é obrigatório']"
+                    ></v-text-field>
+                  </v-flex>
+                  <v-flex xs12>
+                    <v-textarea
+                    label="Observações"
+                    v-model="subject.form.obs"
+                  ></v-textarea>
+                  </v-flex>
+                </v-layout>
+              </v-form>
             </v-card-text>
             <v-card-actions>
-              <v-btn @click="gravarMateria" depressed color="primary">Gravar</v-btn>
+              <v-btn :disabled="!subject.valid" @click="saveSubject" depressed color="primary">Gravar</v-btn>
             </v-card-actions>
           </v-card>
         </v-flex>
       </v-layout>
     </v-container>
-    <v-btn color="primary" dark fixed bottom right fab @click="mostrarSugestao">
+    <v-btn color="primary" dark fixed bottom right fab @click="showSuggestion">
       <v-icon>add</v-icon>
     </v-btn>
     <v-dialog v-model="linkModal" max-width="500px">
@@ -206,6 +224,7 @@ export default {
       list:[],
       loading:true,
       new:false,
+      valid:true,
       form:{
         title:'',
         description:'',
@@ -223,6 +242,7 @@ export default {
       list:[],
       loading:true,
       new:false,
+      valid:true,
       form:{
         title:'',
         link:'',
@@ -233,7 +253,7 @@ export default {
     }
   }),
   methods: {
-    getMaterias(){
+    getSubject(){
       this.$axiosAPI
           .get(process.env.VUE_APP_API_URL+"/subject")
           .then(response => {
@@ -243,7 +263,7 @@ export default {
             
           })
     },
-    gerarLink(link){
+    generateLink(link){
       this.linkLoading = true
       axios
         .get("https://cors-anywhere.herokuapp.com/http://tinyurl.com/api-create.php?url="+link)
@@ -251,16 +271,10 @@ export default {
           this.linkLoading = false
           this.linkAtual = response.data
           this.linkModal = true
-        })
-      
+        }) 
     },
-    mostrarSugestao(){
-      this.suggestion.new = true
-      setTimeout(() => {
-        this.$refs.sugestaoForm.scrollIntoView({block:"end",behavior:"smooth"})
-      }, 250);
-    },
-    getSugestao(){
+
+    getSuggestion(){
       this.$axiosAPI
           .get(process.env.VUE_APP_API_URL+"/suggestion")
           .then(response => {
@@ -270,37 +284,52 @@ export default {
             
           })
     },
-    gravarSugestao(){
+    saveSuggestion(){
+      if (this.$refs.suggestion.validate()) {
       this.suggestion.form.user_id = this.jwt_decode.sub
       this.$axiosAPI
         .post(process.env.VUE_APP_API_URL+"/suggestion",this.suggestion.form)
         .then(response => {
           this.snackbarText = "Salvo com sucesso!"
           this.snackbar = true
+          this.$refs.suggestion.reset()
+          this.getSuggestion()
+          this.suggestion.new = false
         })
+      }
     },
-    gravarMateria(){
+    saveSubject(){
+      if (this.$refs.subject.validate()) {
       this.subject.form.user_id = this.jwt_decode.sub
       this.$axiosAPI
         .post(process.env.VUE_APP_API_URL+"/subject",this.subject.form)
         .then(response => {
           this.snackbarText = "Salvo com sucesso!"
           this.snackbar = true
+          this.$refs.subject.reset()
+          this.getSubject()
+          this.subject.new = false
         })
+      }
     },
-    mostrarMateria(suggestion_id){
+    showSubject(suggestion_id){
       this.subject.new = true
       this.subject.form.suggestion_id = suggestion_id
       setTimeout(() => {
         this.$refs.materiaForm.scrollIntoView({block:"end",behavior:"smooth"})
       }, 250);
+    },
+    showSuggestion(){
+      this.suggestion.new = true
+      setTimeout(() => {
+        this.$refs.sugestaoForm.scrollIntoView({block:"end",behavior:"smooth"})
+      }, 250);
     }
   },
-
   created() {
     this.getRole()
-    this.getMaterias()
-    this.getSugestao()
+    this.getSubject()
+    this.getSuggestion()
   }
 };
 </script>

@@ -16,7 +16,6 @@
       <v-list>
         <v-list-tile avatar>
           <v-list-tile-avatar>
-            <img src="https://randomuser.me/api/portraits/men/85.jpg">
           </v-list-tile-avatar>
           <v-list-tile-content class="white--text">
             <v-list-tile-title>{{this.jwt_decode.name}}</v-list-tile-title>

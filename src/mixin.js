@@ -24,11 +24,6 @@ export default {
 
             return Object.assign({}, obj1, obj2)
         },
-        clearForm(form){
-            for (const prop of Object.getOwnPropertyNames(form)) {
-                form[prop] = null;
-            }
-        },
         getRole(){
             this.jwt_decode = this.decodeJWT(this.accessToken)
             this.role.obj = this.jwt_decode.role

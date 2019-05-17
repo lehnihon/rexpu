@@ -45,31 +45,40 @@
         </v-flex>
         <v-flex md6 v-show="asked_questions.new">
           <v-card height="100%">
-            <v-card-title primary-title>
-              <h3 class="headline mb-0">Cadastro de Dúvidas Frequentes</h3>
-            </v-card-title>
-            <v-btn flat fab color="primary" style="position:absolute; right:0; top:0" @click="asked_questions.new = false">
-              <v-icon>close</v-icon>
-            </v-btn>
+            <v-toolbar dark color="primary">
+              <v-toolbar-title>Cadastro Dúvidas Frequentes</v-toolbar-title>
+              <v-spacer></v-spacer>
+              <v-btn icon dark @click="asked_questions.new = false">
+                <v-icon>close</v-icon>
+              </v-btn>
+            </v-toolbar>
 
             <v-card-text>
-              <v-layout row wrap>
-                <v-flex xs12>
-                  <v-textarea
-                    label="Pergunta"
-                    v-model="asked_questions.form.question"
+              <v-form
+                ref="asked_questions"
+                v-model="asked_questions.valid"
+                lazy-validation
+              >
+                <v-layout row wrap>
+                  <v-flex xs12>
+                    <v-textarea
+                      label="Pergunta"
+                      v-model="asked_questions.form.question"
+                      :rules="[v => !!v || 'Pergunta é obrigatória']"
+                    ></v-textarea>
+                  </v-flex>
+                  <v-flex xs12>
+                    <v-textarea
+                    label="Resposta"
+                    v-model="asked_questions.form.answer"
+                    :rules="[v => !!v || 'Respostas é obrigatória']"
                   ></v-textarea>
-                </v-flex>
-                <v-flex xs12>
-                  <v-textarea
-                  label="Resposta"
-                  v-model="asked_questions.form.answer"
-                ></v-textarea>
-                </v-flex>
-              </v-layout>
+                  </v-flex>
+                </v-layout>
+              </v-form>
             </v-card-text>
             <v-card-actions>
-              <v-btn @click="saveAskedQuestions" depressed color="primary">Gravar</v-btn>
+              <v-btn :disabled="!asked_questions.valid" @click="saveAskedQuestions" depressed color="primary">Gravar</v-btn>
             </v-card-actions>
           </v-card>
         </v-flex>
@@ -110,7 +119,7 @@
         </v-flex>
       </v-layout>
     </v-container>
-    <v-btn color="primary" dark fixed bottom right fab @click="asked_questions.new = true">
+    <v-btn color="primary" dark fixed bottom right fab @click="showAskedQ">
       <v-icon>add</v-icon>
     </v-btn>
     <v-snackbar v-model="snackbar" bottom :timeout=1000>
@@ -141,6 +150,7 @@ export default {
       search:'',
       items: [],
       new:false,
+      valid:true,
       form:{
         question:'',
         answer:''
@@ -170,15 +180,24 @@ export default {
         })
       })
     },
+    showAskedQ(){
+      this.asked_questions.new = true
+      setTimeout(() => {
+        this.$refs.asked_questions.scrollIntoView({block:"end",behavior:"smooth"})
+      }, 250);
+    },
     saveAskedQuestions(){
+      if (this.$refs.asked_questions.validate()){
       this.$axiosAPI
         .post(process.env.VUE_APP_API_URL+"/asked-questions",this.asked_questions.form)
         .then(response => {
           this.snackbarText = "Salvo com sucesso!"
           this.snackbar = true
-          this.clearForm(this.asked_questions.form)
+          this.$refs.asked_questions.reset()
           this.getAskedQuestions()
+          this.asked_questions.new = false
         })
+      }
     }
   },
 
