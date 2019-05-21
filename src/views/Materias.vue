@@ -3,7 +3,7 @@
     <h1 class="subheading grey--text mx-4">Matérias</h1>
     <v-container grid-list-md>
       <v-layout row wrap>
-        <v-flex md6>
+        <v-flex md12>
           <v-card height="100%">
             <v-card-title primary-title>
               <h3 class="headline mb-0">Lista de Matérias</h3>
@@ -25,9 +25,11 @@
                     <template v-slot:items="props">
                       <td>{{ props.item.id }}</td>
                       <td>{{ props.item.title }}</td>
+                      <td>{{ props.item.link }}</td>
+                      <td>{{ linkReal+props.item.link_hash }}</td>
                       <td>{{ props.item.created_at }}</td>
                       <td>
-                        <v-btn :loading="linkLoading" small fab flat @click="generateLink(props.item.link)">
+                        <v-btn :loading="linkLoading" small fab flat @click="generateLink(props.item.link_hash)">
                           <v-icon> 
                             insert_link
                           </v-icon>
@@ -46,7 +48,7 @@
             </v-card-text>
           </v-card>
         </v-flex>
-        <v-flex md6>
+        <v-flex md12>
           <v-card height="100%">
             <v-card-title primary-title>
               <h3 class="headline mb-0">Lista de Sugestões</h3>
@@ -185,14 +187,16 @@
       <v-icon>add</v-icon>
     </v-btn>
     <v-dialog v-model="linkModal" max-width="500px">
-      <v-card>
-        <v-card-title>
-          Link: {{linkAtual}}
-        </v-card-title>
-        <v-card-actions>
-          <v-btn color="primary" flat @click="linkModal=false">Fechar</v-btn>
-        </v-card-actions>
-      </v-card>
+      <v-alert
+        value="true"
+        v-model="linkModal"
+        dismissible
+        type="info"
+      >
+        <p>
+          <strong>Link Curto:</strong> {{linkTiny}}
+        </p>
+      </v-alert>
     </v-dialog>
     <v-snackbar v-model="snackbar" bottom :timeout=1000>
       {{ snackbarText }}
@@ -210,7 +214,8 @@ export default {
   data: () => ({
     snackbar: false,
     snackbarText: '',
-    linkAtual: '',
+    linkTiny: '',
+    linkReal:'',
     linkModal: false,
     linkLoading:false,
     suggestion:{
@@ -236,6 +241,8 @@ export default {
       headers:[
         {text:'ID',value:'id'},
         {text:'Título',value:'title'},
+        {text:'Matéria',sortable: false},
+        {text:'Link', sortable: false},
         {text:'Data',value:'created_at'},
         { text: 'Ações', sortable: false }
       ],
@@ -254,6 +261,7 @@ export default {
   }),
   methods: {
     getSubject(){
+      this.linkReal = process.env.VUE_APP_API_URL+"link/";
       this.$axiosAPI
           .get(process.env.VUE_APP_API_URL+"/subject")
           .then(response => {
@@ -266,12 +274,12 @@ export default {
     generateLink(link){
       this.linkLoading = true
       axios
-        .get("https://cors-anywhere.herokuapp.com/http://tinyurl.com/api-create.php?url="+link)
+        .get("https://cors-anywhere.herokuapp.com/http://tinyurl.com/api-create.php?url="+process.env.VUE_APP_API_URL+"/link/"+link)
         .then(response => {
           this.linkLoading = false
-          this.linkAtual = response.data
+          this.linkTiny = response.data
           this.linkModal = true
-        }) 
+        })
     },
 
     getSuggestion(){

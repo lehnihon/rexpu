@@ -3,27 +3,37 @@
     <h1 class="subheading grey--text mx-4">Painel</h1>
     <v-container grid-list-md>
       <v-layout row wrap>
-        <v-flex md4>
+        <v-flex md3>
+          <v-card color="primary" class="white--text">
+            <v-card-title primary-title>
+              <div>
+                <div class="headline" v-if="user">R${{user.amount}}</div>
+                <span>SALDO</span>
+              </div>
+            </v-card-title>
+          </v-card>
+        </v-flex>
+        <v-flex md3>
           <v-card color="error" class="white--text">
             <v-card-title primary-title>
               <div>
                 <div class="headline" v-if="cpm.list.publisher">R${{cpm.list.publisher.amount}}</div>
-                <span>CPM PUBLISHER HOJE</span>
+                <span>CPM PUBLISHER</span>
               </div>
             </v-card-title>
           </v-card>
         </v-flex>
-        <v-flex md4>
+        <v-flex md3>
           <v-card color="error" class="white--text">
             <v-card-title primary-title>
               <div>
                 <div class="headline" v-if="cpm.list.publisher">R${{cpm.list.redator.amount}}</div>
-                <span>CPM REDATOR HOJE</span>
+                <span>CPM REDATOR</span>
               </div>
             </v-card-title>
           </v-card>
         </v-flex>
-        <v-flex md4>
+        <v-flex md3>
           <v-card color="error" class="white--text">
             <v-card-title primary-title>
               <div>
@@ -33,10 +43,55 @@
             </v-card-title>
           </v-card>
         </v-flex>
-        <v-flex md6>
+      </v-layout>
+      <v-layout row>
+        <v-flex shrink pa-1 v-if="memberAproved.new">
           <v-card height="100%">
             <v-card-title primary-title>
               <h3 class="headline mb-0">Aprovar Membros</h3>
+            </v-card-title>
+
+            <v-card-text>
+              <v-layout row wrap>
+                <v-flex xs12>
+                  <v-text-field
+                    v-model="memberAproved.search"
+                    append-icon="search"
+                    label="Procurar"
+                    single-line
+                    hide-details
+                  ></v-text-field>
+                </v-flex>
+                <v-flex xs12>
+                  <v-data-table disable-initial-sort :headers="memberAproved.headers" :items="memberAproved.list" :search="memberAproved.search" :loading="memberAproved.loading">
+                    <template v-slot:items="props">
+                      <td>{{ props.item.id }}</td>
+                      <td>{{ props.item.name }}</td>
+                      <td>{{ props.item.email }}</td>
+                      <td>
+                        <v-btn small fab flat @click="dialog = true;memberAproved.currentId = props.item.id">
+                          <v-icon> 
+                            check_circle
+                          </v-icon>
+                        </v-btn>
+                      </td>
+                    </template>
+                    <v-alert
+                      v-slot:no-results
+                      :value="true"
+                      color="error"
+                      icon="warning"
+                    >Your search for "{{ search }}" found no results.</v-alert>
+                  </v-data-table>
+                </v-flex>
+              </v-layout>
+            </v-card-text>
+          </v-card>
+        </v-flex>
+        <v-flex grow pa-1>
+          <v-card height="100%">
+            <v-card-title primary-title>
+              <h3 class="headline mb-0">Lista de Membros</h3>
             </v-card-title>
 
             <v-card-text>
@@ -56,13 +111,9 @@
                       <td>{{ props.item.id }}</td>
                       <td>{{ props.item.name }}</td>
                       <td>{{ props.item.email }}</td>
-                      <td>
-                        <v-btn small fab flat @click="dialog = true;member.currentId = props.item.id">
-                          <v-icon> 
-                            check_circle
-                          </v-icon>
-                        </v-btn>
-                      </td>
+                      <td>R${{ props.item.amount }}</td>
+                      <td>{{ props.item.clicks_a }}</td>
+                      <td>{{ props.item.clicks_b }}</td>
                     </template>
                     <v-alert
                       v-slot:no-results
@@ -94,7 +145,7 @@
           <v-btn
             color="primary"
             flat="flat"
-            @click="aproveMember(member.currentId)"
+            @click="aproveMember(memberAproved.currentId)"
           >
             Sim
           </v-btn>
@@ -102,7 +153,7 @@
           <v-btn
             color="primary"
             flat="flat"
-            @click="disapproveMember(member.currentId)"
+            @click="disapproveMember(memberAproved.currentId)"
           >
             Não
           </v-btn>
@@ -131,7 +182,7 @@ export default {
       perc_member:'',
       loading:true
     },
-    member:{
+    memberAproved:{
       headers:[
         {text:'ID',value:'id'},
         {text:'Nome',value:'name'},
@@ -140,12 +191,34 @@ export default {
       ],
       loading:true,
       currentId:'',
+      new:false,
       form:{
         name:'',
         email:'',
         password:''
       }
     },
+    member:{
+      headers:[
+        {text:'ID',value:'id'},
+        {text:'Nome',value:'name'},
+        {text:'E-mail',value:'email'},
+        {text: 'Saldo', value:'amount' },
+        {text: 'Clicks P.', value:'clicks_a' },
+        {text: 'Clicks R.', value:'clicks_b' },
+      ],
+      list:[],
+      loading:true,
+      new:false,
+      valid:true,
+      form:{
+        name:'',
+        email:'',
+        password:''
+      }
+    },
+    user:{
+    }
   }),
   methods: {
     getCPM() {
@@ -166,12 +239,38 @@ export default {
           
         })
     },
-    getMembers(){
+    getMembersAccepted(){
       this.$axiosAPI
           .get(process.env.VUE_APP_API_URL+"/user/accepted")
           .then(response => {
+            if(response.data.length){
+              this.memberAproved.new = true
+            }else{
+              this.memberAproved.new = false
+            }
+            this.memberAproved.list = response.data
+            this.memberAproved.loading = false
+          }).catch(function (error) {
+            this.snackbarText = "Erro ao consultar!"
+            this.snackbar = true
+          })
+    },
+    getMembers(){
+      this.$axiosAPI
+          .get(process.env.VUE_APP_API_URL+"/user")
+          .then(response => {
             this.member.list = response.data
             this.member.loading = false
+          }).catch(function (error) {
+            this.snackbarText = "Erro ao consultar!"
+            this.snackbar = true
+          })
+    },
+    getUser(){
+      this.$axiosAPI
+          .get(process.env.VUE_APP_API_URL+"/user/"+this.jwt_decode.sub)
+          .then(response => {
+            this.user = response.data
           }).catch(function (error) {
             this.snackbarText = "Erro ao consultar!"
             this.snackbar = true
@@ -181,9 +280,9 @@ export default {
       this.$axiosAPI
           .post(process.env.VUE_APP_API_URL+"/user/accepted/"+id)
           .then(response => {
+            this.getMembersAccepted()
             this.snackbarText = "Aprovado!"
             this.snackbar = true
-            this.getMembers()
           }).catch(function (error) {
             this.snackbarText = "Erro ao consultar!"
             this.snackbar = true
@@ -194,9 +293,9 @@ export default {
       this.$axiosAPI
           .post(process.env.VUE_APP_API_URL+"/user/naccepted/"+id)
           .then(response => {
+            this.getMembersAccepted()
             this.snackbarText = "Não Aprovado!"
             this.snackbar = true
-            this.getMembers()
           }).catch(function (error) {
             this.snackbarText = "Erro ao consultar!"
             this.snackbar = true
@@ -211,6 +310,8 @@ export default {
     this.getCPM()
     this.getConfigurations()
     this.getMembers()
+    this.getMembersAccepted()
+    this.getUser()
   }
 }
 </script>

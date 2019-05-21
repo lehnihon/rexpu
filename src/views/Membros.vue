@@ -27,6 +27,11 @@
                       <td>{{ props.item.name }}</td>
                       <td>{{ props.item.email }}</td>
                       <td>
+                        <v-btn small fab flat @click="editMember(props.item)">
+                          <v-icon> 
+                            edit
+                          </v-icon>
+                        </v-btn>    
                       </td>
                     </template>
                     <v-alert
@@ -90,6 +95,64 @@
             </v-card-actions>
           </v-card>
         </v-flex>
+        <v-flex md6 v-show="member.edit.new" ref="memberEditForm">
+          <v-card height="100%">
+            <v-toolbar dark color="primary">
+              <v-toolbar-title>Edição de Membros ID:{{member.edit.form.id}}</v-toolbar-title>
+              <v-spacer></v-spacer>
+              <v-btn icon dark @click="member.edit.new = false">
+                <v-icon>close</v-icon>
+              </v-btn>
+            </v-toolbar>
+
+            <v-card-text>
+              <v-form
+                ref="memberEdit"
+                v-model="member.edit.valid"
+                lazy-validation
+              >
+                <v-layout row wrap>
+                  <v-flex xs12>
+                    <v-text-field
+                      label="Novo Nome"
+                      v-model="member.edit.form.name"
+                      :rules="[v => !!v || 'Nome é obrigatório']"
+                    ></v-text-field>
+                  </v-flex>
+                  <v-flex xs12>
+                    <v-text-field
+                      label="Novo E-mail"
+                      v-model="member.edit.form.email"
+                    ></v-text-field>
+                  </v-flex>
+                  <v-flex xs12>
+                    <v-text-field
+                      label="Nova Senha"
+                      v-model="member.edit.form.password"
+                    ></v-text-field>
+                   </v-flex>
+                  <v-flex xs12>
+                    <v-checkbox
+                      v-model="member.edit.form.accepted"
+                      label="Aprovado"
+                      required
+                    ></v-checkbox>
+                  </v-flex>
+                  <v-flex xs12>
+                    <v-checkbox
+                      v-model="member.edit.form.active"
+                      label="Ativo"
+                      required
+                    ></v-checkbox>
+                  </v-flex>
+                </v-layout>
+              </v-form>
+            </v-card-text>
+            <v-card-actions>
+              <v-btn :disabled="!member.edit.valid" @click="updateMember" depressed color="primary">Alterar</v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-flex>
       </v-layout>
     </v-container>
     <v-btn color="primary" dark fixed bottom right fab @click="showMember">
@@ -119,6 +182,18 @@ export default {
         {text:'E-mail',value:'email'},
         { text: 'Ações', sortable: false }
       ],
+      edit:{
+        form:{
+          id:'',
+          name:'',
+          email:'',
+          password:'',
+          accepted:'',
+          active:''
+        },
+        valid:true,
+        new:false
+      },
       list:[],
       loading:true,
       new:false,
@@ -133,14 +208,14 @@ export default {
   methods:{
     getMembers(){
       this.$axiosAPI
-          .get(process.env.VUE_APP_API_URL+"/user")
-          .then(response => {
-            this.member.list = response.data
-            this.member.loading = false
-          }).catch(function (error) {
-            this.snackbarText = "Erro ao consultar!"
-            this.snackbar = true
-          })
+        .get(process.env.VUE_APP_API_URL+"/user")
+        .then(response => {
+          this.member.list = response.data
+          this.member.loading = false
+        }).catch(function (error) {
+          this.snackbarText = "Erro ao consultar!"
+          this.snackbar = true
+        })
     },
     showMember(){
       this.member.new = true
@@ -151,13 +226,39 @@ export default {
     saveMember(){
       if (this.$refs.member.validate()) {
       this.$axiosAPI
-        .post(process.env.VUE_APP_API_URL+"/user",this.member.form)
+        .put(process.env.VUE_APP_API_URL+"/user",this.member.edit)
         .then(response => {
           this.snackbarText = "Salvo com sucesso!"
           this.snackbar = true
-          this.$refs.member.reset()
+          this.$refs.memberEdit.reset()
           this.getMembers()
-          this.member.new = false
+          this.member.edit.new = false
+        }).catch(function (error) {
+          this.snackbarText = "Erro ao gravar!"
+          this.snackbar = true   
+        })
+      }
+    },
+    editMember(member){
+      setTimeout(() => {
+        this.$refs.memberEditForm.scrollIntoView({block:"end",behavior:"smooth"})
+      }, 250);
+      this.member.edit.form.id = member.id
+      this.member.edit.form.name = member.name
+      this.member.edit.form.accepted = (member.accepted == '0') ?  false : true
+      this.member.edit.form.active = (member.active == '0') ? false : true
+      this.member.edit.new = true
+    },
+    updateMember(){
+      if (this.$refs.memberEdit.validate()) {
+      this.$axiosAPI
+        .put(process.env.VUE_APP_API_URL+"/user",this.member.edit.form)
+        .then(response => {
+          this.snackbarText = "Alterado com sucesso!"
+          this.snackbar = true
+          this.$refs.memberEdit.reset()
+          this.getMembers()
+          this.member.edit.new = false
         }).catch(function (error) {
           this.snackbarText = "Erro ao gravar!"
           this.snackbar = true   
