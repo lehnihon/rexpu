@@ -31,6 +31,7 @@
                     <template v-slot:items="props">
                       <td>{{ props.item.id }}</td>
                       <td>{{ props.item.title }}</td>
+                      <td>{{ props.item.user.name }}</td>
                       <td>{{ props.item.created_at }}</td>
                       <td>
                         <v-btn small fab flat @click="showDetails(props.item)">
@@ -158,6 +159,7 @@ export default {
       headers: [
         { text: "ID", value: "id" },
         { text: "Título", value: "title" },
+        { text: "Usuário", value: "user.name" },
         { text: "Data", value: "created_at" },
         { text: "Ações", sortable: false }
       ],

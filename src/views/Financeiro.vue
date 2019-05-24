@@ -1,5 +1,5 @@
 <template>
-  <div class="financeiro">
+  <div class="fincial">
     <h1 class="subheading grey--text mx-4">Financeiro</h1>
     <v-container grid-list-md>
       <v-layout row wrap>
@@ -25,6 +25,7 @@
                     <template v-slot:items="props">
                       <td>{{ props.item.id }}</td>
                       <td>{{ props.item.title }}</td>
+                      <td>{{ props.item.user.name }}</td>
                       <td>R${{ props.item.amount }}</td>
                       <td>
                         <v-btn class="mx-0" small fab flat @click="showTransaction(props.item)">
@@ -211,6 +212,7 @@ export default {
       headers: [
         { text: "ID", value: "id" },
         { text: "Título", value: "question" },
+        { text: "Usuário", value: "user.name" },
         { text: "Valor", value: "amount" },
         { text: "Ações", sortable: false }
       ],

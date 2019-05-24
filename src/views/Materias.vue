@@ -26,12 +26,17 @@
                       <td>{{ props.item.id }}</td>
                       <td>{{ props.item.title }}</td>
                       <td>{{ props.item.link }}</td>
-                      <td>{{ linkReal+props.item.link_hash }}</td>
+                      <td>{{ linkReal+props.item.users[0].pivot.link_hash }}</td>
                       <td>{{ props.item.created_at }}</td>
                       <td>
-                        <v-btn :loading="linkLoading" small fab flat @click="generateLink(props.item.link_hash)">
+                        <v-btn :loading="linkLoading" small fab flat @click="generateLink(props.item.users[0].pivot.link_hash)">
                           <v-icon> 
                             insert_link
+                          </v-icon>
+                        </v-btn>
+                        <v-btn :loading="linkLoading" small fab flat @click="deleteSubject(props.item.id)">
+                          <v-icon> 
+                            delete
                           </v-icon>
                         </v-btn>
                       </td>
@@ -263,7 +268,7 @@ export default {
     getSubject(){
       this.linkReal = process.env.VUE_APP_API_URL+"link/";
       this.$axiosAPI
-          .get(process.env.VUE_APP_API_URL+"/subject")
+          .get(process.env.VUE_APP_API_URL+"/subject/user/"+this.jwt_decode.sub)
           .then(response => {
             this.subject.list = response.data
             this.subject.loading = false
@@ -332,6 +337,17 @@ export default {
       setTimeout(() => {
         this.$refs.sugestaoForm.scrollIntoView({block:"end",behavior:"smooth"})
       }, 250);
+    },
+    deleteSubject(idSubject){
+      if(confirm("Desativar?")){
+        this.$axiosAPI
+          .put(process.env.VUE_APP_API_URL+"/subject/disable",{id:idSubject})
+          .then(response => {
+            this.snackbarText = "Desativado com sucesso!"
+            this.snackbar = true
+            this.getSubject()
+          })
+      }
     }
   },
   created() {
