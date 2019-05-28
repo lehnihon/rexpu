@@ -112,6 +112,24 @@
                 lazy-validation
               >
                 <v-layout row wrap>
+                  <v-flex md4>
+                   <v-checkbox
+                      v-model="member.edit.form.role.adm"
+                      label="Administrador"
+                    ></v-checkbox>
+                  </v-flex>
+                  <v-flex md4>
+                   <v-checkbox
+                      v-model="member.edit.form.role.pub"
+                      label="Publisher"
+                    ></v-checkbox>
+                  </v-flex>
+                  <v-flex md4>
+                   <v-checkbox
+                      v-model="member.edit.form.role.red"
+                      label="Redator"
+                    ></v-checkbox>
+                  </v-flex>
                   <v-flex xs12>
                     <v-text-field
                       label="Novo Nome"
@@ -144,6 +162,27 @@
                       label="Ativo"
                       required
                     ></v-checkbox>
+                  </v-flex>
+                  <v-flex xs12>
+                    <v-checkbox
+                      v-model="member.edit.star"
+                      label="Estrela"
+                      required
+                    ></v-checkbox>
+                  </v-flex>
+                  <v-flex xs12 v-if="member.edit.star">
+                    <v-text-field
+                      label="CPM Publisher"
+                      v-model="member.edit.form.cpm_a"
+                      mask="######"
+                    ></v-text-field>
+                  </v-flex>
+                  <v-flex xs12 v-if="member.edit.star">
+                    <v-text-field
+                      label="CPM Redator"
+                      v-model="member.edit.form.cpm_b"
+                      mask="######"
+                    ></v-text-field>
                   </v-flex>
                 </v-layout>
               </v-form>
@@ -189,10 +228,16 @@ export default {
           email:'',
           password:'',
           accepted:'',
-          active:''
+          active:'',
+          role:{
+            adm:false,
+            pub:false,
+            red:false
+          }
         },
         valid:true,
-        new:false
+        new:false,
+        star:false
       },
       list:[],
       loading:true,
@@ -226,7 +271,7 @@ export default {
     saveMember(){
       if (this.$refs.member.validate()) {
       this.$axiosAPI
-        .put(process.env.VUE_APP_API_URL+"/user",this.member.edit)
+        .post(process.env.VUE_APP_API_URL+"/user",this.member.form)
         .then(response => {
           this.snackbarText = "Salvo com sucesso!"
           this.snackbar = true
@@ -247,22 +292,47 @@ export default {
       this.member.edit.form.name = member.name
       this.member.edit.form.accepted = (member.accepted == '0') ?  false : true
       this.member.edit.form.active = (member.active == '0') ? false : true
+      this.member.edit.form.cpm_a = member.cpm_a
+      this.member.edit.form.cpm_b = member.cpm_b
+      this.member.edit.form.role.adm = false
+      this.member.edit.form.role.pub = false
+      this.member.edit.form.role.red = false
+      for(var i in member.role){
+        if(member.role[i].role == 'Administrador'){
+          this.member.edit.form.role.adm = true
+        }
+        if(member.role[i].role == 'Publisher'){
+          this.member.edit.form.role.pub = true
+        }
+        if(member.role[i].role == 'Redator'){
+          this.member.edit.form.role.red = true
+        }
+      }
+      if(this.member.edit.form.cpm_a != '0' || this.member.edit.form.cpm_b != '0'){
+        this.member.edit.star = true
+      }else{
+        this.member.edit.star = false
+      }
       this.member.edit.new = true
     },
     updateMember(){
       if (this.$refs.memberEdit.validate()) {
-      this.$axiosAPI
-        .put(process.env.VUE_APP_API_URL+"/user",this.member.edit.form)
-        .then(response => {
-          this.snackbarText = "Alterado com sucesso!"
-          this.snackbar = true
-          this.$refs.memberEdit.reset()
-          this.getMembers()
-          this.member.edit.new = false
-        }).catch(function (error) {
-          this.snackbarText = "Erro ao gravar!"
-          this.snackbar = true   
-        })
+        if(!this.member.edit.star){
+          this.member.edit.form.cpm_a = '0'
+          this.member.edit.form.cpm_b = '0'
+        }
+        this.$axiosAPI
+          .put(process.env.VUE_APP_API_URL+"/user",this.member.edit.form)
+          .then(response => {
+            this.snackbarText = "Alterado com sucesso!"
+            this.snackbar = true
+            this.$refs.memberEdit.reset()
+            this.getMembers()
+            this.member.edit.new = false
+          }).catch(function (error) {
+            this.snackbarText = "Erro ao gravar!"
+            this.snackbar = true   
+          })
       }
     }
   },
