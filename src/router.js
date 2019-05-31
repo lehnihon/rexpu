@@ -11,6 +11,7 @@ import SuporteTicket from './views/SuporteTicket'
 import DuvidasFrequentes from './views/DuvidasFrequentes'
 import Financeiro from './views/Financeiro'
 import Configuracoes from './views/Configuracoes'
+import Indicacoes from './views/Indicacoes'
 
 
 Vue.use(Router)
@@ -63,6 +64,11 @@ const router =  new Router({
       path: '/financeiro',
       name: 'financeiro',
       component: Financeiro
+    },
+    {
+      path: '/indicacoes',
+      name: 'indicacoes',
+      component: Indicacoes
     },
     {
       path: '/configuracoes',

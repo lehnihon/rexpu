@@ -23,7 +23,17 @@
         </v-list-tile>
       </v-list>
       <v-divider class="deep-purple mx-2"></v-divider>
-      <v-list>
+      <v-list v-if="this.role.list.includes(1)">
+        <v-list-tile v-for="link in linksAdmin" :key="link.text" router :to="link.route">
+          <v-list-tile-action>
+              <v-icon class="white--text">{{ link.icon }}</v-icon>
+          </v-list-tile-action>
+          <v-list-tile-content>
+            <v-list-tile-title class="white--text">{{ link.text }}</v-list-tile-title>
+          </v-list-tile-content>
+        </v-list-tile>
+      </v-list>
+      <v-list v-else>
         <v-list-tile v-for="link in links" :key="link.text" router :to="link.route">
           <v-list-tile-action>
               <v-icon class="white--text">{{ link.icon }}</v-icon>
@@ -46,16 +56,25 @@ export default {
     return {
       mini: true,
       drawer:false,
+      linksAdmin:[
+        { icon: 'dashboard', text: 'Painel', route: '/' },
+        { icon: 'attach_money', text: 'CPM', route: '/cpm' },
+        { icon: 'person_pin', text: 'Membros', route: '/membros' },
+        { icon: 'computer', text: 'Matérias', route: '/materias' },
+        { icon: 'assignment', text: 'Relatórios', route: '/relatorios' },
+        { icon: 'question_answer', text: 'Suporte/Ticket', route: '/suporte-ticket' },
+        { icon: 'help_outline', text: 'Dúvidas Frequentes', route: '/duvidas-frequentes' },
+        { icon: 'credit_card', text: 'Financeiro', route: '/financeiro' },
+        { icon: 'supervisor_account', text: 'Indicações', route: '/indicacoes' },
+        { icon: 'build', text: 'Configurações', route: '/configuracoes' },
+      ],
       links:[
-          { icon: 'dashboard', text: 'Painel', route: '/' },
-          { icon: 'attach_money', text: 'CPM', route: '/cpm' },
-          { icon: 'person_pin', text: 'Membros', route: '/membros' },
-          { icon: 'computer', text: 'Matérias', route: '/materias' },
-          { icon: 'assignment', text: 'Relatórios', route: '/relatorios' },
-          { icon: 'question_answer', text: 'Suporte/Ticket', route: '/suporte-ticket' },
-          { icon: 'help_outline', text: 'Dúvidas Frequentes', route: '/duvidas-frequentes' },
-          { icon: 'credit_card', text: 'Financeiro', route: '/financeiro' },
-          { icon: 'build', text: 'Configurações', route: '/configuracoes' },
+        { icon: 'dashboard', text: 'Painel', route: '/' },
+        { icon: 'computer', text: 'Matérias', route: '/materias' },
+        { icon: 'question_answer', text: 'Suporte/Ticket', route: '/suporte-ticket' },
+        { icon: 'help_outline', text: 'Dúvidas Frequentes', route: '/duvidas-frequentes' },
+        { icon: 'credit_card', text: 'Financeiro', route: '/financeiro' },
+        { icon: 'build', text: 'Configurações', route: '/configuracoes' },
       ]
     };
   },

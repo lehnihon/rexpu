@@ -2,9 +2,9 @@
   <div class="painel">
     <h1 class="subheading grey--text mx-4">Painel</h1>
     <v-container grid-list-md>
-      <v-layout row wrap>
-        <v-flex md3>
-          <v-card color="primary" class="white--text">
+      <v-layout v-if="(role.list.includes(2) || role.list.includes(3))" row wrap>
+        <v-flex>
+          <v-card height="100%" color="primary" class="white--text">
             <v-card-title primary-title>
               <div>
                 <div class="headline" v-if="user">R${{user.amount}}</div>
@@ -13,8 +13,8 @@
             </v-card-title>
           </v-card>
         </v-flex>
-        <v-flex md3>
-          <v-card color="error" class="white--text">
+        <v-flex>
+          <v-card height="100%" color="error" class="white--text">
             <v-card-title primary-title>
               <div>
                 <div class="headline" v-if="cpm.list.publisher">R${{cpm.list.publisher.amount}}</div>
@@ -23,8 +23,8 @@
             </v-card-title>
           </v-card>
         </v-flex>
-        <v-flex md3>
-          <v-card color="error" class="white--text">
+        <v-flex>
+          <v-card height="100%" color="error" class="white--text">
             <v-card-title primary-title>
               <div>
                 <div class="headline" v-if="cpm.list.publisher">R${{cpm.list.redator.amount}}</div>
@@ -33,8 +33,8 @@
             </v-card-title>
           </v-card>
         </v-flex>
-        <v-flex md3>
-          <v-card color="error" class="white--text">
+        <v-flex>
+          <v-card height="100%" color="error" class="white--text">
             <v-card-title primary-title>
               <div>
                 <div class="headline">{{this.config.perc_member}}%</div>
@@ -44,7 +44,61 @@
           </v-card>
         </v-flex>
       </v-layout>
-      <v-layout row>
+      <v-layout v-if="(role.list.includes(2) || role.list.includes(3))" row wrap>
+        <v-flex>
+          <v-card height="100%" color="success" class="white--text">
+            <v-card-title primary-title>
+              <div>
+                <div class="headline" v-if="cpm.list.publisher">{{clicks_publisher}}</div>
+                <span>CLICKS PUBLISHER</span>
+              </div>
+            </v-card-title>
+          </v-card>
+        </v-flex>
+        <v-flex>
+          <v-card height="100%" color="success" class="white--text">
+            <v-card-title primary-title>
+              <div>
+                <div class="headline" v-if="cpm.list.publisher">{{clicks_redator}}</div>
+                <span>CLICKS REDATOR</span>
+              </div>
+            </v-card-title>
+          </v-card>
+        </v-flex>
+        <v-flex>
+          <v-card height="100%" color="success" class="white--text">
+            <v-card-title primary-title>
+              <div>
+                <div class="headline" v-if="cpm.list.publisher">R${{value_publisher}}</div>
+                <span>GANHO PUBLISHER</span>
+              </div>
+            </v-card-title>
+          </v-card>
+        </v-flex>
+        <v-flex>
+          <v-card height="100%" color="success" class="white--text">
+            <v-card-title primary-title>
+              <div>
+                <div class="headline" v-if="cpm.list.publisher">R${{value_redator}}</div>
+                <span>GANHO REDATOR</span>
+              </div>
+            </v-card-title>
+          </v-card>
+        </v-flex>
+      </v-layout>
+      <v-layout v-if="(role.list.includes(2) || role.list.includes(3))" row wrap>
+        <v-flex>
+          <v-card height="100%" color="primary" class="white--text">
+            <v-card-title primary-title>
+              <div>
+                <div v-if="user && config">{{config.indication_link+"/"+user.indication_hash}}</div>
+                <span>LINK CONVITE</span>
+              </div>
+            </v-card-title>
+          </v-card>
+        </v-flex>
+      </v-layout>
+      <v-layout row v-if="(role.list.includes(1))">
         <v-flex shrink pa-1 v-if="memberAproved.new">
           <v-card height="100%">
             <v-card-title primary-title>
@@ -180,6 +234,7 @@ export default {
     },
     config:{
       perc_member:'',
+      indication_link:'',
       loading:true
     },
     memberAproved:{
@@ -218,7 +273,12 @@ export default {
       }
     },
     user:{
-    }
+      amount:0
+    },
+    clicks_publisher:0,
+    value_publisher:0,
+    clicks_redator:0,
+    value_redator:0,
   }),
   methods: {
     getCPM() {
@@ -233,7 +293,7 @@ export default {
       this.$axiosAPI
         .get(process.env.VUE_APP_API_URL+"/general-config")
         .then(response => {
-          this.config.perc_member = response.data.perc_member
+          this.config = response.data
           this.config.loading = false
         }).catch(function (error) {
           
@@ -268,9 +328,13 @@ export default {
     },
     getUser(){
       this.$axiosAPI
-          .get(process.env.VUE_APP_API_URL+"/user/"+this.jwt_decode.sub)
+          .get(process.env.VUE_APP_API_URL+"/user/full/"+this.jwt_decode.sub)
           .then(response => {
-            this.user = response.data
+            this.user = response.data.user
+            this.clicks_publisher = response.data.clicks_publisher
+            this.value_publisher = response.data.value_publisher
+            this.clicks_redator = response.data.clicks_redator
+            this.value_redator = response.data.value_redator
           }).catch(function (error) {
             this.snackbarText = "Erro ao consultar!"
             this.snackbar = true
@@ -307,10 +371,12 @@ export default {
 
   created() {
     this.getRole()
+    if(this.role.list.includes(1)){
+      this.getMembers()
+      this.getMembersAccepted()
+    }
     this.getCPM()
     this.getConfigurations()
-    this.getMembers()
-    this.getMembersAccepted()
     this.getUser()
   }
 }

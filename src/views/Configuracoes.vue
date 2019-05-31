@@ -3,7 +3,7 @@
     <h1 class="subheading grey--text mx-4">Configurações</h1>
     <v-container grid-list-md>
       <v-layout row wrap>
-        <v-flex md12>
+        <v-flex v-if="role.list.includes(1)" md12>
           <v-card height="100%">
             <v-card-title primary-title>
               <h3 class="headline mb-0">Configurações Gerais</h3>
@@ -20,6 +20,11 @@
                   ></v-text-field>
                 </v-flex>
                 <v-flex md6>
+                  <v-text-field
+                    label="Link Indicação"
+                    v-model="config.indication_link"
+                    :loading="config.loading"
+                  ></v-text-field>
                 </v-flex>
               </v-layout>
             </v-card-text>
@@ -152,6 +157,7 @@
       },
       config:{
         perc_member:'',
+        indication_link:'',
         loading: true,
       },
       snackbar: false,
@@ -162,13 +168,7 @@
         this.$axiosAPI
           .get(process.env.VUE_APP_API_URL+"/user/"+this.jwt_decode.sub)
           .then(response => {
-            this.user.wp_user = response.data.wp_user
-            this.user.wp_login = response.data.wp_login
-            this.user.wp_password = response.data.wp_password
-            this.user.bank = response.data.bank
-            this.user.agency = response.data.agency
-            this.user.account = response.data.account
-            this.user.cpf = response.data.cpf
+            this.user = response.data
             this.user.loading = false
           }).catch(function (error) {
             
@@ -178,7 +178,7 @@
         this.$axiosAPI
           .get(process.env.VUE_APP_API_URL+"/general-config")
           .then(response => {
-            this.config.perc_member = response.data.perc_member
+            this.config = response.data
             this.config.loading = false
           }).catch(function (error) {
             
@@ -205,6 +205,7 @@
         this.$axiosAPI
           .put(process.env.VUE_APP_API_URL+"/general-config",{
             perc_member: this.config.perc_member,
+            indication_link: this.config.indication_link
           })
           .then(response => {
             this.snackbarText = "Salvo com sucesso!"

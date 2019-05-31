@@ -72,7 +72,11 @@
                     <v-text-field :rules="[v => !!v || 'Título é obrigatório']" label="Título" v-model="ticket.form.title"></v-text-field>
                   </v-flex>
                   <v-flex xs12>
-                    <v-textarea :rules="[v => !!v || 'Descrição é obrigatório']" label="Descrição" v-model="ticket.form.description"></v-textarea>
+                    <vue-editor 
+                    v-model="ticket.form.description"
+                    :editorToolbar="customToolbar"
+                    placeholder="Descrição"
+                    ></vue-editor>
                   </v-flex>
                 </v-layout>
               </v-form>
@@ -99,11 +103,14 @@
                 lazy-validation
               >
                 <v-layout row wrap>
-                  <v-flex xs12>
-                    <span>{{ticketDetails.item.description}}</span>
+                  <v-flex xs12 v-html="ticketDetails.item.description">
                   </v-flex>
                   <v-flex xs12>
-                    <v-textarea :rules="[v => !!v || 'Resposta é obrigatório']" label="Resposta" v-model="ticketDetails.form.obs"></v-textarea>
+                    <vue-editor 
+                    v-model="ticketDetails.form.obs"
+                    :editorToolbar="customToolbar"
+                    placeholder="Resposta"
+                    ></vue-editor>
                   </v-flex>
                   <v-flex xs12>
                     <v-btn
@@ -118,11 +125,10 @@
                       <template v-for="(item,index) in ticketDetails.list">
                         <v-layout row wrap :key="item.obs">
                           <v-flex xs12 class="font-weight-bold mr-3">
-                            {{item.ticket.user.name}}
+                            {{item.user.name}}
                           </v-flex>
 
-                          <v-flex xs12>
-                            {{item.obs}}
+                          <v-flex xs12 v-html="item.obs">
                           </v-flex>
                         </v-layout>
                         <v-divider class="my-2" v-if="(ticketDetails.list.length-1) != index" :key="index" inset></v-divider>
@@ -149,12 +155,17 @@
 <script>
 import axios from "axios";
 import mixin from "../mixin";
+import { VueEditor } from "vue2-editor";
 export default {
-  components: {},
+  components: {VueEditor},
   mixins: [mixin],
   data: () => ({
     snackbar: false,
     snackbarText: "",
+    customToolbar:[
+      ["bold", "italic", "underline"],
+      [{ list: "ordered" }, { list: "bullet" }]
+    ],
     ticket: {
       headers: [
         { text: "ID", value: "id" },
@@ -191,6 +202,16 @@ export default {
     }
   }),
   methods: {
+    getSuportTicketAdmin() {
+      this.$axiosAPI
+        .get(
+          process.env.VUE_APP_API_URL + "/ticket"
+        )
+        .then(response => {
+          this.ticket.list = response.data;
+          this.ticket.loading = false;
+        });
+    },
     getSuportTicket() {
       this.$axiosAPI
         .get(
@@ -218,6 +239,7 @@ export default {
             this.snackbarText = "Salvo com sucesso!";
             this.snackbar = true;
             this.$refs.ticket.reset()
+            this.ticket.form.description = ''
             this.getSuportTicket();
             this.ticket.new = false
           });
@@ -225,17 +247,20 @@ export default {
     },
     saveSuportTicketObs(ticket) {
       if (this.$refs.ticketDetails.validate()) {
-        this.ticketDetails.form.ticket_id = ticket;
-        this.ticketDetails.form.user_id = this.jwt_decode.sub;
-        this.$axiosAPI
-          .post(process.env.VUE_APP_API_URL + "/ticket-obs", this.ticketDetails.form)
-          .then(response => {
-            this.snackbarText = "Salvo com sucesso!";
-            this.snackbar = true;
-            this.$refs.ticketDetails.reset()
-            this.getSuportTicketObs(ticket);
-          });
-      }
+        if(this.ticketDetails.form.obs != ''){
+          this.ticketDetails.form.ticket_id = ticket;
+          this.ticketDetails.form.user_id = this.jwt_decode.sub;
+          this.$axiosAPI
+            .post(process.env.VUE_APP_API_URL + "/ticket-obs", this.ticketDetails.form)
+            .then(response => {
+              this.snackbarText = "Salvo com sucesso!";
+              this.snackbar = true;
+              this.$refs.ticketDetails.reset()
+              this.ticketDetails.form.obs = '';
+              this.getSuportTicketObs(ticket);
+            });
+        }
+      }  
     },
     showDetails(ticket) {
       this.ticketDetails.new = true;
@@ -246,7 +271,11 @@ export default {
 
   created() {
     this.getRole();
-    this.getSuportTicket();
+    if(this.role.list.includes(1)){
+      this.getSuportTicketAdmin();
+    }else{
+      this.getSuportTicket();
+    }
   }
 };
 </script>

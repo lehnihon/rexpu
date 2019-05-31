@@ -33,7 +33,7 @@
                             search
                           </v-icon>
                         </v-btn>
-                        <v-btn class="mx-0" small fab flat @click="aproveTransaction(props.item.id)">
+                        <v-btn v-if="(role.list.includes(1))" class="mx-0" small fab flat @click="aproveTransaction(props.item.id)">
                           <v-icon> 
                             check_circle
                           </v-icon>
@@ -120,11 +120,11 @@
                   >
                 </v-flex>
                 <v-flex xs12>
-                  <v-textarea
-                    label="Obs"
-                    :rules="[v => !!v || 'Obs é obrigatório']"
+                  <vue-editor 
                     v-model="financial.form.obs"
-                  ></v-textarea>
+                    :editorToolbar="customToolbar"
+                    placeholder="Observações"
+                    ></vue-editor>
                 </v-flex>
               </v-layout>
               </v-form>
@@ -178,8 +178,7 @@
             <v-list-tile-action class="headline mr-3">
               Obs
             </v-list-tile-action>
-            <v-list-tile-content>
-             {{financial.show.obs}}
+            <v-list-tile-content v-html="financial.show.obs">
             </v-list-tile-content> 
           </v-list-tile>
           <v-divider inset></v-divider>
@@ -200,14 +199,18 @@
 <script>
 import axios from "axios";
 import mixin from "../mixin";
+import { VueEditor } from "vue2-editor";
 export default {
-  components: {
-  },
+  components: {VueEditor},
   mixins: [mixin],
   data: () => ({
     snackbar: false,
     snackbarText: "",
     dialog: false,
+    customToolbar:[
+      ["bold", "italic", "underline"],
+      [{ list: "ordered" }, { list: "bullet" }]
+    ],
     financial:{
       headers: [
         { text: "ID", value: "id" },
@@ -245,6 +248,14 @@ export default {
     }
   }),
   methods: {
+    getFinancialAdmin() {
+      this.$axiosAPI
+        .get(process.env.VUE_APP_API_URL+"/financial")
+        .then(response => {
+          this.financial.list = response.data
+          this.financial.loading = false;
+        });
+    },
     getFinancial() {
       this.$axiosAPI
         .get(process.env.VUE_APP_API_URL+"/financial/user/"+this.jwt_decode.sub)
@@ -282,36 +293,59 @@ export default {
     },
     saveTransaction(){
       if (this.$refs.financial.validate()) {
-        if(this.financial.aproved == '1'){
-          this.financial.form.title = "Saque Aprovado";
-        }else{
-          this.financial.form.title = "Saque Não Aprovado";
-        }
         var formData =  new FormData()   
-        formData.append('title',this.financial.form.title);
         formData.append('receipt',this.financial.form.receipt);
         formData.append('obs',this.financial.form.obs);
-        this.$axiosAPI({
-          method: 'post',
-          url: process.env.VUE_APP_API_URL+"/financial/"+this.financial.form.financial_id,
-          data: formData,
-          config: { headers: {'Content-Type': 'multipart/form-data' }}
-        })
-        .then(response => {
-          this.snackbarText = "Aprovado!"
-          this.snackbar = true
-          this.getFinancial()
-          this.$refs.financial.reset()
-          this.financial.newAdm = false
-        }).catch(error => {
-          if(error.response){
-            this.snackbarText = error.response.data.error
+
+        if(this.financial.aproved == '1'){
+          this.financial.form.title = "Saque Aprovado";
+          formData.append('title',this.financial.form.title);
+          this.$axiosAPI({
+            method: 'post',
+            url: process.env.VUE_APP_API_URL+"/financial/aproved/"+this.financial.form.financial_id,
+            data: formData,
+            config: { headers: {'Content-Type': 'multipart/form-data' }}
+          })
+          .then(response => {
+            this.snackbarText = "Aprovado!"
             this.snackbar = true
-          }else{
-            this.snackbarText = "Erro ao consultar!"
+            this.getFinancial()
+            this.$refs.financial.reset()
+            this.financial.newAdm = false
+          }).catch(error => {
+            if(error.response){
+              this.snackbarText = error.response.data.error
+              this.snackbar = true
+            }else{
+              this.snackbarText = "Erro ao consultar!"
+              this.snackbar = true
+            }
+          })
+        }else{
+          this.financial.form.title = "Saque Não Aprovado";
+          formData.append('title',this.financial.form.title);
+          this.$axiosAPI({
+            method: 'post',
+            url: process.env.VUE_APP_API_URL+"/financial/naproved/"+this.financial.form.financial_id,
+            data: formData,
+            config: { headers: {'Content-Type': 'multipart/form-data' }}
+          })
+          .then(response => {
+            this.snackbarText = "Aprovado!"
             this.snackbar = true
-          }
-        })
+            this.getFinancial()
+            this.$refs.financial.reset()
+            this.financial.newAdm = false
+          }).catch(error => {
+            if(error.response){
+              this.snackbarText = error.response.data.error
+              this.snackbar = true
+            }else{
+              this.snackbarText = "Erro ao consultar!"
+              this.snackbar = true
+            }
+          })
+        }
       }
     },
     pickFile() {
@@ -341,7 +375,11 @@ export default {
 
   created() {
     this.getRole()
-    this.getFinancial()
+    if(this.role.list.includes(1)){
+      this.getFinancialAdmin()
+    }else{
+      this.getFinancial()
+    }
   }
 }
 </script>

@@ -2,7 +2,7 @@
   <div class="duvidas-frequentes">
     <h1 class="subheading grey--text mx-4">Dúvidas Frequentes</h1>
     <v-container grid-list-md>
-      <v-layout row wrap>
+      <v-layout row wrap v-if="(role.list.includes(1))">
         <v-flex md6>
           <v-card height="100%">
             <v-card-title primary-title>
@@ -24,12 +24,8 @@
                   <v-data-table disable-initial-sort :headers="asked_questions.headers" :items="asked_questions.list" :search="asked_questions.search" :loading="asked_questions.loading">
                     <template v-slot:items="props">
                       <td>{{ props.item.id }}</td>
-                      <td>{{ props.item.question }}</td>
+                      <td v-html="props.item.question"></td>
                       <td>{{ props.item.created_at }}</td>
-                      <td>
-                        <v-icon class="mr-2">search</v-icon>
-                        <v-icon>edit</v-icon>
-                      </td>
                     </template>
                     <v-alert
                       v-slot:no-results
@@ -61,18 +57,18 @@
               >
                 <v-layout row wrap>
                   <v-flex xs12>
-                    <v-textarea
-                      label="Pergunta"
-                      v-model="asked_questions.form.question"
-                      :rules="[v => !!v || 'Pergunta é obrigatória']"
-                    ></v-textarea>
+                    <vue-editor 
+                    v-model="asked_questions.form.question"
+                    :editorToolbar="customToolbar"
+                    placeholder="Pergunta"
+                    ></vue-editor>
                   </v-flex>
                   <v-flex xs12>
-                    <v-textarea
-                    label="Resposta"
+                    <vue-editor 
                     v-model="asked_questions.form.answer"
-                    :rules="[v => !!v || 'Respostas é obrigatória']"
-                  ></v-textarea>
+                    :editorToolbar="customToolbar"
+                    placeholder="Resposta"
+                    ></vue-editor>
                   </v-flex>
                 </v-layout>
               </v-form>
@@ -82,6 +78,8 @@
             </v-card-actions>
           </v-card>
         </v-flex>
+      </v-layout>
+      <v-layout row wrap>
         <v-flex md12>
           <v-card>
 
@@ -96,7 +94,7 @@
                 <template v-slot:activator>
                   <v-list-tile>
                     <v-list-tile-content>
-                      <v-list-tile-title>{{ item.title }}</v-list-tile-title>
+                      <v-list-tile-title v-html="item.title"></v-list-tile-title>
                     </v-list-tile-content>
                   </v-list-tile>
                 </template>
@@ -106,7 +104,7 @@
                   :key="subItem.title"
                 >
                   <v-list-tile-content>
-                    <v-list-tile-title>{{ subItem.title }}</v-list-tile-title>
+                    <v-list-tile-title v-html="subItem.title"></v-list-tile-title>
                   </v-list-tile-content>
 
                   <v-list-tile-action>
@@ -119,7 +117,7 @@
         </v-flex>
       </v-layout>
     </v-container>
-    <v-btn color="primary" dark fixed bottom right fab @click="showAskedQ">
+    <v-btn v-if="(role.list.includes(1))" color="primary" dark fixed bottom right fab @click="showAskedQ">
       <v-icon>add</v-icon>
     </v-btn>
     <v-snackbar v-model="snackbar" bottom :timeout=1000>
@@ -132,19 +130,24 @@
 <script>
 import axios from "axios";
 import mixin from "../mixin";
+import { VueEditor } from "vue2-editor";
 export default {
   components: {
+    VueEditor
   },
   mixins: [mixin],
   data: () => ({
     snackbar: false,
     snackbarText: "",
+    customToolbar:[
+      ["bold", "italic", "underline"],
+      [{ list: "ordered" }, { list: "bullet" }]
+    ],
     asked_questions:{
       headers: [
         { text: "ID", value: "id" },
         { text: "Pergunta", value: "question" },
-        { text: "Data", value: "created_at" },
-        { text: "Ações", sortable: false }
+        { text: "Data", value: "created_at" }
       ],
       list:[],
       search:'',
@@ -188,15 +191,17 @@ export default {
     },
     saveAskedQuestions(){
       if (this.$refs.asked_questions.validate()){
-      this.$axiosAPI
-        .post(process.env.VUE_APP_API_URL+"/asked-questions",this.asked_questions.form)
-        .then(response => {
-          this.snackbarText = "Salvo com sucesso!"
-          this.snackbar = true
-          this.$refs.asked_questions.reset()
-          this.getAskedQuestions()
-          this.asked_questions.new = false
-        })
+        if(this.asked_questions.form.question != '' && this.asked_questions.form.answer != ''){
+        this.$axiosAPI
+          .post(process.env.VUE_APP_API_URL+"/asked-questions",this.asked_questions.form)
+          .then(response => {
+            this.snackbarText = "Salvo com sucesso!"
+            this.snackbar = true
+            this.$refs.asked_questions.reset()
+            this.getAskedQuestions()
+            this.asked_questions.new = false
+          })
+        }
       }
     }
   },

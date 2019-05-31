@@ -3,7 +3,7 @@
     <h1 class="subheading grey--text mx-4">Matérias</h1>
     <v-container grid-list-md>
       <v-layout row wrap>
-        <v-flex md12>
+        <v-flex md12 v-if="(role.list.includes(1) || role.list.includes(2))">
           <v-card height="100%">
             <v-card-title primary-title>
               <h3 class="headline mb-0">Lista de Matérias</h3>
@@ -25,7 +25,6 @@
                     <template v-slot:items="props">
                       <td>{{ props.item.id }}</td>
                       <td>{{ props.item.title }}</td>
-                      <td>{{ props.item.link }}</td>
                       <td>{{ linkReal+props.item.users[0].pivot.link_hash }}</td>
                       <td>{{ props.item.created_at }}</td>
                       <td>
@@ -77,7 +76,7 @@
                       <td>{{ props.item.title }}</td>
                       <td>{{ props.item.link }}</td>
                       <td>
-                        <v-btn class="mx-0" small fab flat @click="showSubject(props.item.id)" v-if="(role.list.includes(1) || role.list.includes(2))">
+                        <v-btn v-if="(role.list.includes(1) || role.list.includes(3))" class="mx-0" small fab flat @click="showSubject(props.item.id)">
                           <v-icon> 
                             computer
                           </v-icon>
@@ -128,10 +127,11 @@
                     ></v-text-field>
                   </v-flex>
                   <v-flex xs12>
-                    <v-textarea
-                    label="Descrição"
+                    <vue-editor 
                     v-model="suggestion.form.description"
-                  ></v-textarea>
+                    :editorToolbar="customToolbar"
+                    placeholder="Descrição"
+                    ></vue-editor>
                   </v-flex>
                 </v-layout>
               </v-form>
@@ -173,10 +173,11 @@
                     ></v-text-field>
                   </v-flex>
                   <v-flex xs12>
-                    <v-textarea
-                    label="Observações"
+                    <vue-editor 
                     v-model="subject.form.obs"
-                  ></v-textarea>
+                    :editorToolbar="customToolbar"
+                    placeholder="Observações"
+                    ></vue-editor>
                   </v-flex>
                 </v-layout>
               </v-form>
@@ -188,7 +189,7 @@
         </v-flex>
       </v-layout>
     </v-container>
-    <v-btn color="primary" dark fixed bottom right fab @click="showSuggestion">
+    <v-btn v-if="(role.list.includes(1) || role.list.includes(2))" color="primary" dark fixed bottom right fab @click="showSuggestion">
       <v-icon>add</v-icon>
     </v-btn>
     <v-dialog v-model="linkModal" max-width="500px">
@@ -213,8 +214,9 @@
 <script>
 import axios from "axios";
 import mixin from '../mixin'
+import { VueEditor } from "vue2-editor";
 export default {
-  components: {},
+  components: {VueEditor},
   mixins: [mixin],
   data: () => ({
     snackbar: false,
@@ -223,6 +225,10 @@ export default {
     linkReal:'',
     linkModal: false,
     linkLoading:false,
+    customToolbar:[
+      ["bold", "italic", "underline"],
+      [{ list: "ordered" }, { list: "bullet" }]
+    ],
     suggestion:{
       search: '',
       headers:[
@@ -246,7 +252,6 @@ export default {
       headers:[
         {text:'ID',value:'id'},
         {text:'Título',value:'title'},
-        {text:'Matéria',sortable: false},
         {text:'Link', sortable: false},
         {text:'Data',value:'created_at'},
         { text: 'Ações', sortable: false }
