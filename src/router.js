@@ -2,6 +2,8 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import store from './store';
 import Login from './views/Login'
+import Cadastro from './views/Cadastro'
+import CadastroIndicacoes from './views/CadastroIndicacoes'
 import Painel from './views/Painel'
 import CPM from './views/CPM'
 import Membros from './views/Membros'
@@ -23,7 +25,8 @@ const router =  new Router({
     {
       path: '/',
       name: 'painel',
-      component: Painel
+      component: Painel,
+      beforeEnter: requireAuth
     },
     {
       path: '/login',
@@ -31,49 +34,68 @@ const router =  new Router({
       component: Login
     },
     {
+      path: '/cadastro',
+      name: 'cadastro',
+      component: Cadastro
+    },
+    {
+      path: '/cadastro-indicacoes/:hash',
+      name: 'cadastro-indicacoes',
+      component: CadastroIndicacoes
+    },
+    {
       path: '/cpm',
       name: 'cpm',
-      component: CPM
+      component: CPM,
+      beforeEnter: requireAuth
     },
     {
       path: '/membros',
       name: 'membros',
-      component: Membros
+      component: Membros,
+      beforeEnter: requireAuth
     },
     {
       path: '/materias',
       name: 'materias',
-      component: Materias
+      component: Materias,
+      beforeEnter: requireAuth
     },
     {
       path: '/relatorios',
       name: 'relatorios',
-      component: Relatorios
+      component: Relatorios,
+      beforeEnter: requireAuth
     },
     {
       path: '/suporte-ticket',
       name: 'suporte-ticket',
-      component: SuporteTicket
+      component: SuporteTicket,
+      beforeEnter: requireAuth
     },
     {
       path: '/duvidas-frequentes',
       name: 'duvidas-frequentes',
-      component: DuvidasFrequentes
+      component: DuvidasFrequentes,
+      beforeEnter: requireAuth
     },
     {
       path: '/financeiro',
       name: 'financeiro',
-      component: Financeiro
+      component: Financeiro,
+      beforeEnter: requireAuth
     },
     {
       path: '/indicacoes',
       name: 'indicacoes',
-      component: Indicacoes
+      component: Indicacoes,
+      beforeEnter: requireAuth
     },
     {
       path: '/configuracoes',
       name: 'configuracoes',
-      component: Configuracoes
+      component: Configuracoes,
+      beforeEnter: requireAuth
     },
     {
       path: '*',
@@ -82,22 +104,20 @@ const router =  new Router({
   ]
 })
 
-router.beforeEach((to, from, next) => {
+function requireAuth(to, from, next){
   store.dispatch('fetchAccessToken');
   store.dispatch('fetchAccessWP');
-  
-  if (to.fullPath !== '/login') {
-    if (!store.state.accessToken) {
-      next('/login');
-    }
-  }
   
   if (to.fullPath === '/login') {
     if (store.state.accessToken) {
       next('/');
     }
+  }else{
+    if (!store.state.accessToken) {
+      next('/login');
+    }
   }
   next();
-});
+};
 
 export default router;

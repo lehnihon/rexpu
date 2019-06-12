@@ -91,7 +91,7 @@
           <v-card height="100%" color="primary" class="white--text">
             <v-card-title primary-title>
               <div>
-                <div v-if="user && config">{{config.indication_link+"/"+user.indication_hash}}</div>
+                <div v-if="user && config">{{indication_link+"/"+user.indication_hash}}</div>
                 <span>LINK CONVITE</span>
               </div>
             </v-card-title>
@@ -228,13 +228,13 @@ export default {
     snackbar: false,
     snackbarText: "",
     dialog:false,
+    indication_link:null,
     cpm:{
       list:[],
       loading:true
     },
     config:{
       perc_member:'',
-      indication_link:'',
       loading:true
     },
     memberAproved:{
@@ -331,6 +331,7 @@ export default {
           .get(process.env.VUE_APP_API_URL+"/user/full/"+this.jwt_decode.sub)
           .then(response => {
             this.user = response.data.user
+            this.indication_link = window.location.origin+"/cadastro-indicacoes"
             this.clicks_publisher = response.data.clicks_publisher
             this.value_publisher = response.data.value_publisher
             this.clicks_redator = response.data.clicks_redator

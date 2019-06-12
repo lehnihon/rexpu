@@ -3,7 +3,7 @@
     <h1 class="subheading grey--text mx-4">Matérias</h1>
     <v-container grid-list-md>
       <v-layout row wrap>
-        <v-flex md12 v-if="(role.list.includes(1) || role.list.includes(2))">
+        <v-flex md12>
           <v-card height="100%">
             <v-card-title primary-title>
               <h3 class="headline mb-0">Lista de Matérias</h3>
@@ -28,12 +28,12 @@
                       <td>{{ linkReal+props.item.users[0].pivot.link_hash }}</td>
                       <td>{{ props.item.created_at }}</td>
                       <td>
-                        <v-btn :loading="linkLoading" small fab flat @click="generateLink(props.item.users[0].pivot.link_hash)">
+                        <v-btn v-if="(role.list.includes(1) || role.list.includes(2))" :loading="linkLoading" small fab flat @click="generateLink(props.item.users[0].pivot.link_hash)">
                           <v-icon> 
                             insert_link
                           </v-icon>
                         </v-btn>
-                        <v-btn :loading="linkLoading" small fab flat @click="deleteSubject(props.item.id)">
+                        <v-btn v-if="role.list.includes(1)" :loading="linkLoading" small fab flat @click="deleteSubject(props.item.id)">
                           <v-icon> 
                             delete
                           </v-icon>

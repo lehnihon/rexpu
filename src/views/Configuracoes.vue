@@ -19,13 +19,6 @@
                     mask="###"
                   ></v-text-field>
                 </v-flex>
-                <v-flex md6>
-                  <v-text-field
-                    label="Link Indicação"
-                    v-model="config.indication_link"
-                    :loading="config.loading"
-                  ></v-text-field>
-                </v-flex>
               </v-layout>
             </v-card-text>
 
@@ -157,7 +150,6 @@
       },
       config:{
         perc_member:'',
-        indication_link:'',
         loading: true,
       },
       snackbar: false,
@@ -204,8 +196,7 @@
       saveConfigurations(){
         this.$axiosAPI
           .put(process.env.VUE_APP_API_URL+"/general-config",{
-            perc_member: this.config.perc_member,
-            indication_link: this.config.indication_link
+            perc_member: this.config.perc_member
           })
           .then(response => {
             this.snackbarText = "Salvo com sucesso!"

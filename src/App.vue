@@ -1,6 +1,6 @@
 <template>
   <v-app class="grey lighten-4">
-    <Navbar v-if="['login'].indexOf($route.name)"/>
+    <Navbar v-if="['login'].indexOf($route.name) && ['cadastro'].indexOf($route.name) && ['cadastro-indicacoes'].indexOf($route.name)"/>
     <v-content>
       <router-view></router-view>
     </v-content>
