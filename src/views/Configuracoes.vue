@@ -123,7 +123,7 @@
         flat
         @click="snackbar = false"
       >
-        Close
+        Fechar
       </v-btn>
     </v-snackbar>
   </div>
@@ -162,8 +162,9 @@
           .then(response => {
             this.user = response.data
             this.user.loading = false
-          }).catch(function (error) {
-            
+          }).catch(error => {
+            this.snackbarText = "Erro ao carregar usuário!"
+            this.snackbar = true   
           })
       },
       getConfigurations(){
@@ -172,8 +173,9 @@
           .then(response => {
             this.config = response.data
             this.config.loading = false
-          }).catch(function (error) {
-            
+          }).catch(error => {
+            this.snackbarText = "Erro ao carregar configs!"
+            this.snackbar = true   
           })
       },
       saveUser(){
@@ -191,6 +193,9 @@
           .then(response => {
             this.snackbarText = "Salvo com sucesso!"
             this.snackbar = true
+          }).catch(error => {
+            this.snackbarText = "Erro ao gravar!"
+            this.snackbar = true   
           })
       },
       saveConfigurations(){
@@ -201,11 +206,14 @@
           .then(response => {
             this.snackbarText = "Salvo com sucesso!"
             this.snackbar = true
+          }).catch(error => {
+            this.snackbarText = "Erro ao gravar!"
+            this.snackbar = true   
           })
       }
     },
     
-    mounted () {
+    created() {
       this.getRole()
       this.getUser()
       this.getConfigurations()

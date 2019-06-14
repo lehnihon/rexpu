@@ -7,6 +7,9 @@
           <v-card height="100%">
             <v-card-title primary-title>
               <h3 class="headline mb-0">Lista de Membros</h3>
+              <v-btn class="ml-auto" color="primary" dark @click="showMember">
+                <v-icon>add</v-icon> NOVO MEMBRO
+              </v-btn>
             </v-card-title>
 
             <v-card-text>
@@ -91,7 +94,7 @@
               </v-form>
             </v-card-text>
             <v-card-actions>
-              <v-btn :disabled="!member.valid" @click="saveMember" depressed color="primary">Gravar</v-btn>
+              <v-btn :loading="member.btnLoading" :disabled="!member.valid" @click="saveMember" depressed color="primary">Gravar</v-btn>
             </v-card-actions>
           </v-card>
         </v-flex>
@@ -188,15 +191,12 @@
               </v-form>
             </v-card-text>
             <v-card-actions>
-              <v-btn :disabled="!member.edit.valid" @click="updateMember" depressed color="primary">Alterar</v-btn>
+              <v-btn :loading="member.edit.btnLoading" :disabled="!member.edit.valid" @click="updateMember" depressed color="primary">Alterar</v-btn>
             </v-card-actions>
           </v-card>
         </v-flex>
       </v-layout>
     </v-container>
-    <v-btn color="primary" dark fixed bottom right fab @click="showMember">
-      <v-icon>add</v-icon>
-    </v-btn>
     <v-snackbar v-model="snackbar" bottom :timeout=1000>
       {{ snackbarText }}
       <v-btn color="pink" flat @click="snackbar = false">Close</v-btn>
@@ -237,16 +237,22 @@ export default {
         },
         valid:true,
         new:false,
-        star:false
+        star:false,
+        btnLoading:false
       },
       list:[],
       loading:true,
+      btnLoading:false,
       new:false,
       valid:true,
+      username:'',
       form:{
         name:'',
         email:'',
-        password:''
+        password:'',
+        wp_user:'',
+        wp_login:'',
+        wp_password:''
       }
     },
   }),
@@ -270,17 +276,43 @@ export default {
     },
     saveMember(){
       if (this.$refs.member.validate()) {
-      this.$axiosAPI
-        .post(process.env.VUE_APP_API_URL+"/user",this.member.form)
-        .then(response => {
-          this.snackbarText = "Salvo com sucesso!"
-          this.snackbar = true
-          this.$refs.memberEdit.reset()
-          this.getMembers()
-          this.member.edit.new = false
-        }).catch(function (error) {
-          this.snackbarText = "Erro ao gravar!"
+        this.member.valid = false
+        this.member.btnLoading = true
+        this.member.username = Math.random().toString(36).substr(2, 20)
+        axios
+        .post(process.env.VUE_APP_WP_URL + "/wp-json/wp/v2/users",{
+            username:this.member.username,
+            name:this.member.form.name,
+            email:this.member.form.email,
+            password:this.member.form.password
+          },
+          {
+          headers: {
+            'Authorization': "Basic " + btoa(process.env.VUE_APP_WP_ADMIN)
+          }
+        }).then(response => {
+          this.member.form.wp_user = response.data.id
+          this.member.form.wp_login = this.member.username
+          this.member.form.wp_password = response.wp_password
+          this.$axiosAPI
+          .post(process.env.VUE_APP_API_URL+"/user",this.member.form)
+            .then(response => {
+              this.snackbarText = "Salvo com sucesso!"
+              this.snackbar = true
+              this.$refs.member.reset()
+              
+              this.getMembers()
+              this.member.new = false
+            }).catch((error) => {
+              this.snackbarText = "Erro ao gravar!"
+              this.snackbar = true   
+            })
+        }).catch((error) => {
+          this.snackbarText = "Erro ao criar o usuário wp!"
           this.snackbar = true   
+        }).finally(() => {
+          this.member.valid = true
+          this.member.btnLoading = false
         })
       }
     },
@@ -317,6 +349,8 @@ export default {
     },
     updateMember(){
       if (this.$refs.memberEdit.validate()) {
+        this.member.edit.valid = false
+        this.member.edit.btnLoading = true
         if(!this.member.edit.star){
           this.member.edit.form.cpm_a = '0'
           this.member.edit.form.cpm_b = '0'
@@ -329,9 +363,12 @@ export default {
             this.$refs.memberEdit.reset()
             this.getMembers()
             this.member.edit.new = false
-          }).catch(function (error) {
+          }).catch((error) => {
             this.snackbarText = "Erro ao gravar!"
             this.snackbar = true   
+          }).finally(() => {
+            this.member.edit.valid = true
+            this.member.edit.btnLoading = false
           })
       }
     }

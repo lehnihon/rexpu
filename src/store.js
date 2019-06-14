@@ -5,6 +5,18 @@ import router from './router';
 
 Vue.use(Vuex)
 
+const decode = (jwt) => {
+  if (typeof jwt !== 'string' & !jwt instanceof String) return null
+
+  let splitted = jwt.split('.')
+  if (splitted.length < 2) return null
+
+  let obj1 = JSON.parse(atob(splitted[0]))
+  let obj2 = JSON.parse(atob(splitted[1]))
+
+  return Object.assign({}, obj1, obj2)
+}
+
 export default new Vuex.Store({
   state: {
     accessToken: null,
@@ -59,16 +71,16 @@ export default new Vuex.Store({
           commit('loginStop', null);
           commit('updateAccessToken', response.data.token);
           commit('updateAccessTokenExpire', expire );
-          dispatch('doLoginWP');
+          dispatch('doLoginWP',decode(response.data.token));
         })
         .catch(error => {
           commit('loginStop', error.response.data.error);
           commit('updateAccessToken', null);
         })
     },
-    doLoginWP({ commit }) {
+    doLoginWP({ commit }, jwt) {
       axios
-        .get(process.env.VUE_APP_API_URL + "/config", {
+        .get(process.env.VUE_APP_API_URL + "/user/"+jwt.sub, {
           headers: {
             'Authorization': "Bearer " + this.state.accessToken
           }

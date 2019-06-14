@@ -9,7 +9,7 @@ export default {
     }),
     computed: {
         ...mapState([
-            'accessToken',
+            'accessToken', "accessTokenWP","userWP"
         ])
     },
     methods: {

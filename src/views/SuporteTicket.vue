@@ -7,6 +7,9 @@
           <v-card height="100%">
             <v-card-title primary-title>
               <h3 class="headline mb-0">Lista de Tickets</h3>
+              <v-btn class="ml-auto" color="primary" dark @click="showTicket">
+                <v-icon>add</v-icon> NOVO TICKET
+              </v-btn>
             </v-card-title>
 
             <v-card-text>
@@ -51,7 +54,7 @@
             </v-card-text>
           </v-card>
         </v-flex>
-        <v-flex md6 v-show="ticket.new">
+        <v-flex md6 v-show="ticket.new" ref="ticketForm">
           <v-card height="100%">
             <v-toolbar dark color="primary">
               <v-toolbar-title>Cadastro de Ticket</v-toolbar-title>
@@ -82,11 +85,11 @@
               </v-form>
             </v-card-text>
             <v-card-actions>
-              <v-btn :disabled="!ticket.valid" @click="saveSuportTicket" depressed color="primary">Gravar</v-btn>
+              <v-btn :loading="ticket.btnLoading" :disabled="!ticket.valid" @click="saveSuportTicket" depressed color="primary">Gravar</v-btn>
             </v-card-actions>
           </v-card>
         </v-flex>
-        <v-flex md12 v-show="ticketDetails.new">
+        <v-flex md12 v-show="ticketDetails.new" ref="ticketDetailsForm">
           <v-card height="100%">
             <v-toolbar dark color="primary">
               <v-toolbar-title>{{ticketDetails.item.title}}</v-toolbar-title>
@@ -114,6 +117,7 @@
                   </v-flex>
                   <v-flex xs12>
                     <v-btn
+                      :loading="ticketDetails.btnLoading"
                       :disabled="!ticketDetails.valid"
                       @click="saveSuportTicketObs(ticketDetails.item.id)"
                       depressed
@@ -142,9 +146,6 @@
         </v-flex>
       </v-layout>
     </v-container>
-    <v-btn color="primary" dark fixed bottom right fab @click="ticket.new = true">
-      <v-icon>add</v-icon>
-    </v-btn>
     <v-snackbar v-model="snackbar" bottom :timeout=1000>
       {{ snackbarText }}
       <v-btn color="pink" flat @click="snackbar = false">Close</v-btn>
@@ -178,6 +179,7 @@ export default {
       search: "",
       new: false,
       loading: true,
+      btnLoading:false,
       valid:true,
       form: {
         title: "",
@@ -194,6 +196,7 @@ export default {
       },
       list: [],
       valid:true,
+      btnLoading:false,
       form: {
         obs: "",
         ticket_id: "",
@@ -232,6 +235,8 @@ export default {
     },
     saveSuportTicket() {
       if (this.$refs.ticket.validate()) {
+        this.ticket.valid = false
+        this.ticket.btnLoading = true
         this.ticket.form.user_id = this.jwt_decode.sub;
         this.$axiosAPI
           .post(process.env.VUE_APP_API_URL + "/ticket", this.ticket.form)
@@ -242,12 +247,20 @@ export default {
             this.ticket.form.description = ''
             this.getSuportTicket();
             this.ticket.new = false
-          });
+          }).catch((error) => {
+            this.snackbarText = "Erro ao gravar!"
+            this.snackbar = true   
+          }).finally(() => {
+            this.ticket.valid = true
+            this.ticket.btnLoading = false
+          })
       }
     },
     saveSuportTicketObs(ticket) {
       if (this.$refs.ticketDetails.validate()) {
         if(this.ticketDetails.form.obs != ''){
+          this.ticketDetails.valid = false
+          this.ticketDetails.btnLoading = true
           this.ticketDetails.form.ticket_id = ticket;
           this.ticketDetails.form.user_id = this.jwt_decode.sub;
           this.$axiosAPI
@@ -258,12 +271,27 @@ export default {
               this.$refs.ticketDetails.reset()
               this.ticketDetails.form.obs = '';
               this.getSuportTicketObs(ticket);
-            });
+            }).catch((error) => {
+              this.snackbarText = "Erro ao gravar!"
+              this.snackbar = true   
+            }).finally(() => {
+              this.ticketDetails.valid = true
+              this.ticketDetails.btnLoading = false
+            })
         }
       }  
     },
+    showTicket(){
+      this.ticket.new = true
+       setTimeout(() => {
+        this.$refs.ticketForm.scrollIntoView({block:"end",behavior:"smooth"})
+      }, 250);
+    },
     showDetails(ticket) {
       this.ticketDetails.new = true;
+      setTimeout(() => {
+        this.$refs.ticketDetailsForm.scrollIntoView({block:"end",behavior:"smooth"})
+      }, 250);
       this.ticketDetails.item = ticket;
       this.getSuportTicketObs(ticket.id);
     }

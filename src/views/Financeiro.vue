@@ -7,6 +7,9 @@
           <v-card height="100%">
             <v-card-title primary-title>
               <h3 class="headline mb-0">Lista de Saque</h3>
+              <v-btn class="ml-auto" color="primary" dark @click="showFinancial">
+                <v-icon>add</v-icon> NOVO SAQUE
+              </v-btn>
             </v-card-title>
 
             <v-card-text>
@@ -52,7 +55,7 @@
             </v-card-text>
           </v-card>
         </v-flex>
-        <v-flex md6 v-show="financial.new">
+        <v-flex md6 v-show="financial.new" ref="financialForm">
           <v-card height="100%">
             <v-toolbar dark color="primary">
               <v-toolbar-title>Solicitar Saque</v-toolbar-title>
@@ -82,11 +85,11 @@
               </v-form>
             </v-card-text>
             <v-card-actions>
-              <v-btn :disabled="!financial.valid" @click="saveFinancial" depressed color="primary">Solicitar</v-btn>
+              <v-btn :loading="financial.btnLoading" :disabled="!financial.valid" @click="saveFinancial" depressed color="primary">Solicitar</v-btn>
             </v-card-actions>
           </v-card>
         </v-flex>
-        <v-flex md6 v-show="financial.newAdm">
+        <v-flex md6 v-show="financial.newAdm" ref="financialAdmForm">
           <v-card height="100%">
             <v-toolbar dark color="primary">
               <v-toolbar-title>Aprovar Saque ID:{{financial.form.financial_id}}</v-toolbar-title>
@@ -130,15 +133,13 @@
               </v-form>
             </v-card-text>
             <v-card-actions>
-              <v-btn :disabled="!financial.validAdm" @click="saveTransaction()" depressed color="primary">Enviar</v-btn>
+              <v-btn :loading="financial.btnAdmLoading" :disabled="!financial.validAdm" @click="saveTransaction()" depressed color="primary">Enviar</v-btn>
             </v-card-actions>
           </v-card>
         </v-flex>
       </v-layout>
     </v-container>
-    <v-btn color="primary" dark fixed bottom right fab @click="financial.new = true">
-      <v-icon>add</v-icon>
-    </v-btn>
+    
     <v-snackbar v-model="snackbar" bottom :timeout=1500>
       {{ snackbarText }}
       <v-btn color="pink" flat @click="snackbar = false">Close</v-btn>
@@ -244,7 +245,9 @@ export default {
         obs:'',
         user_id:''
       },
-      loading:true
+      loading:true,
+      btnLoading:false,
+      btAdmLoading:false
     }
   }),
   methods: {
@@ -266,6 +269,8 @@ export default {
     },
     saveFinancial(){
       if (this.$refs.financialNew.validate()) {
+        this.financial.valid = false
+        this.financial.btnLoading = true
         this.financial.form.title = "Saque Solicitado";
         this.financial.form.user_id = this.jwt_decode.sub
         this.$axiosAPI
@@ -276,12 +281,27 @@ export default {
             this.$refs.financialNew.reset()
             this.getFinancial()
             this.financial.new = false
+          }).catch((error) => {
+            this.snackbarText = "Erro ao gravar!"
+            this.snackbar = true   
+          }).finally(() => {
+            this.financial.valid = true
+            this.financial.btnLoading = false
           })
       }
     },
     aproveTransaction(id){
       this.financial.newAdm = true
+      setTimeout(() => {
+        this.$refs.financialAdmForm.scrollIntoView({block:"end",behavior:"smooth"})
+      }, 250);
       this.financial.form.financial_id = id
+    },
+    showFinancial(){
+      this.financial.new = true
+      setTimeout(() => {
+        this.$refs.financialForm.scrollIntoView({block:"end",behavior:"smooth"})
+      }, 250);
     },
     showTransaction(transaction){
       this.dialog = true
@@ -298,6 +318,8 @@ export default {
         formData.append('obs',this.financial.form.obs);
 
         if(this.financial.aproved == '1'){
+          this.financial.validAdm = false
+          this.financial.btnAdmLoading = true
           this.financial.form.title = "Saque Aprovado";
           formData.append('title',this.financial.form.title);
           this.$axiosAPI({
@@ -320,8 +342,13 @@ export default {
               this.snackbarText = "Erro ao consultar!"
               this.snackbar = true
             }
+          }).finally(() => {
+            this.financial.validAdm = true
+            this.financial.btnAdmLoading = false
           })
         }else{
+          this.financial.validAdm = false
+          this.financial.btnAdmLoading = true
           this.financial.form.title = "Saque Não Aprovado";
           formData.append('title',this.financial.form.title);
           this.$axiosAPI({
@@ -344,6 +371,9 @@ export default {
               this.snackbarText = "Erro ao consultar!"
               this.snackbar = true
             }
+          }).finally(() => {
+            this.financial.validAdm = true
+            this.financial.btnAdmLoading = false
           })
         }
       }

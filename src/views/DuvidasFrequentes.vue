@@ -7,6 +7,9 @@
           <v-card height="100%">
             <v-card-title primary-title>
               <h3 class="headline mb-0">Lista de Dúvidas Frequentes</h3>
+              <v-btn class="ml-auto" v-if="(role.list.includes(1))" color="primary" dark @click="showAskedQ">
+                <v-icon>add</v-icon> NOVA DÚVIDA
+              </v-btn>
             </v-card-title>
 
             <v-card-text>
@@ -39,7 +42,7 @@
             </v-card-text>
           </v-card>
         </v-flex>
-        <v-flex md6 v-show="asked_questions.new">
+        <v-flex md6 v-show="asked_questions.new" ref="asked_questionsForm">
           <v-card height="100%">
             <v-toolbar dark color="primary">
               <v-toolbar-title>Cadastro Dúvidas Frequentes</v-toolbar-title>
@@ -74,7 +77,7 @@
               </v-form>
             </v-card-text>
             <v-card-actions>
-              <v-btn :disabled="!asked_questions.valid" @click="saveAskedQuestions" depressed color="primary">Gravar</v-btn>
+              <v-btn :loading="asked_questions.btnLoading" :disabled="!asked_questions.valid" @click="saveAskedQuestions" depressed color="primary">Gravar</v-btn>
             </v-card-actions>
           </v-card>
         </v-flex>
@@ -117,9 +120,6 @@
         </v-flex>
       </v-layout>
     </v-container>
-    <v-btn v-if="(role.list.includes(1))" color="primary" dark fixed bottom right fab @click="showAskedQ">
-      <v-icon>add</v-icon>
-    </v-btn>
     <v-snackbar v-model="snackbar" bottom :timeout=1000>
       {{ snackbarText }}
       <v-btn color="pink" flat @click="snackbar = false">Close</v-btn>
@@ -158,7 +158,8 @@ export default {
         question:'',
         answer:''
       },
-      loading:true
+      loading:true,
+      btnLoading:false
     }
   }),
   methods: {
@@ -186,21 +187,31 @@ export default {
     showAskedQ(){
       this.asked_questions.new = true
       setTimeout(() => {
-        this.$refs.asked_questions.scrollIntoView({block:"end",behavior:"smooth"})
+        this.$refs.asked_questionsForm.scrollIntoView({block:"end",behavior:"smooth"})
       }, 250);
     },
     saveAskedQuestions(){
       if (this.$refs.asked_questions.validate()){
         if(this.asked_questions.form.question != '' && this.asked_questions.form.answer != ''){
-        this.$axiosAPI
-          .post(process.env.VUE_APP_API_URL+"/asked-questions",this.asked_questions.form)
-          .then(response => {
-            this.snackbarText = "Salvo com sucesso!"
-            this.snackbar = true
-            this.$refs.asked_questions.reset()
-            this.getAskedQuestions()
-            this.asked_questions.new = false
-          })
+          this.asked_questions.valid = false
+          this.asked_questions.btnLoading = true
+          this.$axiosAPI
+            .post(process.env.VUE_APP_API_URL+"/asked-questions",this.asked_questions.form)
+            .then(response => {
+              this.snackbarText = "Salvo com sucesso!"
+              this.snackbar = true
+              this.$refs.asked_questions.reset()
+              this.asked_questions.form.question = ''
+              this.asked_questions.form.answer = ''
+              this.getAskedQuestions()
+              this.asked_questions.new = false
+            }).catch((error) => {
+              this.snackbarText = "Erro ao gravar!"
+              this.snackbar = true   
+            }).finally(() => {
+              this.asked_questions.valid = true
+              this.asked_questions.btnLoading = false
+            })
         }
       }
     }

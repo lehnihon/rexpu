@@ -7,6 +7,9 @@
           <v-card height="100%">
             <v-card-title primary-title>
               <h3 class="headline mb-0">Lista de CPM</h3>
+              <v-btn class="ml-auto" color="primary" dark @click="cpm.new = true">
+                <v-icon>add</v-icon> NOVO CPM
+              </v-btn>
             </v-card-title>
 
             <v-card-text>
@@ -80,15 +83,12 @@
               </v-form>
             </v-card-text>
             <v-card-actions>
-              <v-btn :disabled="!cpm.valid" @click="saveCPM" depressed color="primary">Gravar</v-btn>
+              <v-btn :loading="cpm.btnLoading" :disabled="!cpm.valid" @click="saveCPM" depressed color="primary">Gravar</v-btn>
             </v-card-actions>
           </v-card>
         </v-flex>
       </v-layout>
     </v-container>
-    <v-btn color="primary" dark fixed bottom right fab @click="cpm.new = true">
-      <v-icon>add</v-icon>
-    </v-btn>
     <v-snackbar v-model="snackbar" bottom :timeout=1000>
       {{ snackbarText }}
       <v-btn color="pink" flat @click="snackbar = false">Close</v-btn>
@@ -126,6 +126,7 @@ export default {
         role_id:'',
         amount:'',
       },
+      btnLoading:false,
       loading:true
     }
   }),
@@ -140,14 +141,23 @@ export default {
     },
     saveCPM(){
       if (this.$refs.cpm.validate()) {
+        this.cpm.valid  = false
+        this.cpm.btnLoading = true
         this.$axiosAPI
           .post(process.env.VUE_APP_API_URL+"/cpm",this.cpm.form)
           .then(response => {
+            
             this.snackbarText = "Salvo com sucesso!"
             this.snackbar = true
             this.$refs.cpm.reset()
             this.getCPM()
             this.cpm.new = false
+          }).catch((error) => {
+            this.snackbarText = "Erro ao gravar!"
+            this.snackbar = true   
+          }).finally(() => {
+            this.cpm.valid  = true
+            this.cpm.btnLoading = false
           })
       }
     }

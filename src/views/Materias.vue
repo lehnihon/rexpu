@@ -26,6 +26,10 @@
                       <td>{{ props.item.id }}</td>
                       <td>{{ props.item.title }}</td>
                       <td>{{ linkReal+props.item.users[0].pivot.link_hash }}</td>
+                      <td><v-img
+                          :src="props.item.wp_subject_img"
+                          width="100"
+                        ></v-img></td>
                       <td>{{ props.item.created_at }}</td>
                       <td>
                         <v-btn v-if="(role.list.includes(1) || role.list.includes(2))" :loading="linkLoading" small fab flat @click="generateLink(props.item.users[0].pivot.link_hash)">
@@ -56,6 +60,9 @@
           <v-card height="100%">
             <v-card-title primary-title>
               <h3 class="headline mb-0">Lista de Sugestões</h3>
+              <v-btn class="ml-auto" v-if="(role.list.includes(1) || role.list.includes(2))" color="primary" dark @click="showSuggestion">
+                <v-icon>add</v-icon> NOVA SUGESTÃO
+              </v-btn>
             </v-card-title>
 
             <v-card-text>
@@ -76,11 +83,6 @@
                       <td>{{ props.item.title }}</td>
                       <td>{{ props.item.link }}</td>
                       <td>
-                        <v-btn v-if="(role.list.includes(1) || role.list.includes(3))" class="mx-0" small fab flat @click="showSubject(props.item.id)">
-                          <v-icon> 
-                            computer
-                          </v-icon>
-                        </v-btn>
                       </td>
                     </template>
                     <v-alert
@@ -137,61 +139,12 @@
               </v-form>
             </v-card-text>
             <v-card-actions>
-              <v-btn :disabled="!suggestion.valid" @click="saveSuggestion" depressed color="primary">Gravar</v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-flex>
-        <v-flex md6 v-show="subject.new" ref="materiaForm">
-          <v-card height="100%">
-            <v-toolbar dark color="primary">
-              <v-toolbar-title>Cadastro de Matéria ID:{{this.subject.form.suggestion_id}}</v-toolbar-title>
-              <v-spacer></v-spacer>
-              <v-btn icon dark @click="subject.new = false">
-                <v-icon>close</v-icon>
-              </v-btn>
-            </v-toolbar>
-
-            <v-card-text>
-              <v-form
-                ref="subject"
-                v-model="subject.valid"
-                lazy-validation
-              >
-                <v-layout row wrap>
-                  <v-flex xs12>
-                    <v-text-field
-                      label="Título"
-                      v-model="subject.form.title"
-                      :rules="[v => !!v || 'Título é obrigatório']"
-                    ></v-text-field>
-                  </v-flex>
-                  <v-flex xs12>
-                    <v-text-field
-                      label="Link matéria"
-                      v-model="subject.form.link"
-                      :rules="[v => !!v || 'Link é obrigatório']"
-                    ></v-text-field>
-                  </v-flex>
-                  <v-flex xs12>
-                    <vue-editor 
-                    v-model="subject.form.obs"
-                    :editorToolbar="customToolbar"
-                    placeholder="Observações"
-                    ></vue-editor>
-                  </v-flex>
-                </v-layout>
-              </v-form>
-            </v-card-text>
-            <v-card-actions>
-              <v-btn :disabled="!subject.valid" @click="saveSubject" depressed color="primary">Gravar</v-btn>
+              <v-btn :loading="suggestion.btnLoading" :disabled="!suggestion.valid" @click="saveSuggestion" depressed color="primary">Gravar</v-btn>
             </v-card-actions>
           </v-card>
         </v-flex>
       </v-layout>
     </v-container>
-    <v-btn v-if="(role.list.includes(1) || role.list.includes(2))" color="primary" dark fixed bottom right fab @click="showSuggestion">
-      <v-icon>add</v-icon>
-    </v-btn>
     <v-dialog v-model="linkModal" max-width="500px">
       <v-alert
         value="true"
@@ -246,28 +199,23 @@ export default {
         description:'',
         link:'',
         user_id:''
-      }
+      },
+      btnLoading:false
     },
     subject:{
       headers:[
         {text:'ID',value:'id'},
         {text:'Título',value:'title'},
         {text:'Link', sortable: false},
+        {text:'Foto', sortable: false},
         {text:'Data',value:'created_at'},
         { text: 'Ações', sortable: false }
       ],
       list:[],
       loading:true,
-      new:false,
-      valid:true,
-      form:{
-        title:'',
-        link:'',
-        obs:'',
-        user_id:'',
-        suggestion_id:'',
-      }
-    }
+      valid:true
+    },
+    subjectwp:[]
   }),
   methods: {
     getSubject(){
@@ -281,6 +229,24 @@ export default {
             
           })
     },
+    getSubjectWP(){
+      axios
+        .get(process.env.VUE_APP_WP_URL + "/wp-json/wp/v2/posts/?author="+this.userWP+"&per_page=1&status=publish&_embed&orderby=modified", {
+          headers: {
+            'Authorization': "Basic " + this.accessTokenWP
+          }
+        })
+        .then(response => {
+          this.subjectwp = response.data
+          this.$axiosAPI
+            .post(process.env.VUE_APP_API_URL+"/subject/wp",{subjects:this.subjectwp,user:this.jwt_decode.sub})
+            .then(response => {
+              this.snackbarText = "Matérias sincronizadas!"
+              this.snackbar = true
+              this.getSubject()
+            })
+        })
+    },
     generateLink(link){
       this.linkLoading = true
       axios
@@ -291,7 +257,6 @@ export default {
           this.linkModal = true
         })
     },
-
     getSuggestion(){
       this.$axiosAPI
           .get(process.env.VUE_APP_API_URL+"/suggestion")
@@ -305,37 +270,25 @@ export default {
     saveSuggestion(){
       if (this.$refs.suggestion.validate()) {
       this.suggestion.form.user_id = this.jwt_decode.sub
+      this.suggestion.valid = false
+      this.suggestion.btnLoading = true
       this.$axiosAPI
         .post(process.env.VUE_APP_API_URL+"/suggestion",this.suggestion.form)
         .then(response => {
+         
           this.snackbarText = "Salvo com sucesso!"
           this.snackbar = true
           this.$refs.suggestion.reset()
           this.getSuggestion()
           this.suggestion.new = false
+        }).catch((error) => {
+          this.snackbarText = "Erro ao gravar!"
+          this.snackbar = true   
+        }).finally(() => {
+          this.suggestion.valid = true
+          this.suggestion.btnLoading = false
         })
       }
-    },
-    saveSubject(){
-      if (this.$refs.subject.validate()) {
-      this.subject.form.user_id = this.jwt_decode.sub
-      this.$axiosAPI
-        .post(process.env.VUE_APP_API_URL+"/subject",this.subject.form)
-        .then(response => {
-          this.snackbarText = "Salvo com sucesso!"
-          this.snackbar = true
-          this.$refs.subject.reset()
-          this.getSubject()
-          this.subject.new = false
-        })
-      }
-    },
-    showSubject(suggestion_id){
-      this.subject.new = true
-      this.subject.form.suggestion_id = suggestion_id
-      setTimeout(() => {
-        this.$refs.materiaForm.scrollIntoView({block:"end",behavior:"smooth"})
-      }, 250);
     },
     showSuggestion(){
       this.suggestion.new = true
@@ -358,6 +311,7 @@ export default {
   created() {
     this.getRole()
     this.getSubject()
+    this.getSubjectWP()
     this.getSuggestion()
   }
 };

@@ -80,7 +80,7 @@
             </v-card-text>
             <v-card-actions>
               <v-spacer></v-spacer>
-              <v-btn :disabled="!valid" color="primary" @click="saveMember">Criar Conta</v-btn>
+              <v-btn :loading="btnLoading" :disabled="!valid" color="primary" @click="saveMember">Criar Conta</v-btn>
             </v-card-actions>
           </v-card>
         </v-flex>
@@ -113,26 +113,56 @@ export default {
     snackbar: false,
     snackbarText: '',
     valid: false,
+    username:'',
+    btnLoading:false,
     form:{
       name: null,
       surname: null,
       email:null,
       password:null,
       passwordb:null,
-      fonts:null
+      fonts:null,
+      wp_user:'',
+      wp_login:'',
+      wp_password:''
     }
   }),
   methods: {
     saveMember(){
       if (this.$refs.member.validate()) {
-      axios
-        .post(process.env.VUE_APP_API_URL+"/user",this.form)
-        .then(response => {
-          this.snackbarText = "Salvo com sucesso!"
-          this.snackbar = true
-          this.$refs.member.reset()
-        }).catch(error => {
-          this.snackbarText = "Erro ao gravar!"
+        this.valid = false
+        this.btnLoading = true
+        this.form.name = this.form.name+" "+this.form.surname
+        this.username = Math.random().toString(36).substr(2, 20)
+        axios
+        .post(process.env.VUE_APP_WP_URL + "/wp-json/wp/v2/users",{
+            username:this.username,
+            name:this.form.name,
+            email:this.form.email,
+            password:this.form.password
+          },
+          {
+          headers: {
+            'Authorization': "Basic " + btoa(process.env.VUE_APP_WP_ADMIN)
+          }
+        }).then(response => {
+          this.form.wp_user = response.data.id
+          this.form.wp_login = this.username
+          this.form.wp_password = response.wp_password
+          axios
+            .post(process.env.VUE_APP_API_URL+"/user",this.form)
+            .then(response => {
+              this.valid = true
+              this.btnLoading = false
+              this.snackbarText = "Salvo com sucesso!"
+              this.snackbar = true
+              this.$refs.member.reset()
+            }).catch(error => {
+              this.snackbarText = "Erro ao gravar!"
+              this.snackbar = true   
+            })
+        }).catch((error) => {
+          this.snackbarText = "Erro ao criar o usuário wp!"
           this.snackbar = true   
         })
       }
