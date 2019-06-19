@@ -13,7 +13,7 @@
             </v-card-title>
           </v-card>
         </v-flex>
-        <v-flex>
+        <v-flex v-if="role.list.includes(2)">
           <v-card height="100%" color="error" class="white--text">
             <v-card-title primary-title>
               <div>
@@ -23,7 +23,7 @@
             </v-card-title>
           </v-card>
         </v-flex>
-        <v-flex>
+        <v-flex v-if="role.list.includes(3)">
           <v-card height="100%" color="error" class="white--text">
             <v-card-title primary-title>
               <div>
@@ -98,8 +98,8 @@
           </v-card>
         </v-flex>
       </v-layout>
-      <v-layout row v-if="(role.list.includes(1))">
-        <v-flex shrink pa-1 v-if="memberAproved.new">
+      <v-layout  row wrap v-if="(role.list.includes(1))">
+        <v-flex xs v-if="memberAproved.new">
           <v-card height="100%">
             <v-card-title primary-title>
               <h3 class="headline mb-0">Aprovar Membros</h3>
@@ -142,10 +142,10 @@
             </v-card-text>
           </v-card>
         </v-flex>
-        <v-flex grow pa-1>
+        <v-flex xs>
           <v-card height="100%">
             <v-card-title primary-title>
-              <h3 class="headline mb-0">Lista de Membros</h3>
+              <h3 class="headline mb-0">Visitas de hoje</h3>
             </v-card-title>
 
             <v-card-text>
@@ -165,9 +165,10 @@
                       <td>{{ props.item.id }}</td>
                       <td>{{ props.item.name }}</td>
                       <td>{{ props.item.email }}</td>
-                      <td>R${{ props.item.amount }}</td>
-                      <td>{{ props.item.clicks_a }}</td>
-                      <td>{{ props.item.clicks_b }}</td>
+                      <td>R${{ props.item.clickspub }}</td>
+                      <td>R${{ props.item.clicksred }}</td>
+                      <td>{{ props.item.clickpub }}</td>
+                      <td>{{ props.item.clickred }}</td>  
                     </template>
                     <v-alert
                       v-slot:no-results
@@ -258,9 +259,10 @@ export default {
         {text:'ID',value:'id'},
         {text:'Nome',value:'name'},
         {text:'E-mail',value:'email'},
-        {text: 'Saldo', value:'amount' },
-        {text: 'Clicks P.', value:'clicks_a' },
-        {text: 'Clicks R.', value:'clicks_b' },
+        {text: 'Ganho P.', value:'clickspub' },
+        {text: 'Ganho R.', value:'clicksred' },
+        {text: 'Visitas P.', value:'clickpub' },
+        {text: 'Visitas R.', value:'clickred' }
       ],
       list:[],
       loading:true,
@@ -270,7 +272,7 @@ export default {
         name:'',
         email:'',
         password:''
-      }
+      },
     },
     user:{
       amount:0
@@ -295,7 +297,7 @@ export default {
         .then(response => {
           this.config = response.data
           this.config.loading = false
-        }).catch(function (error) {
+        }).catch((error) => {
           
         })
     },
@@ -310,21 +312,47 @@ export default {
             }
             this.memberAproved.list = response.data
             this.memberAproved.loading = false
-          }).catch(function (error) {
+          }).catch((error) => {
             this.snackbarText = "Erro ao consultar!"
             this.snackbar = true
           })
     },
-    getMembers(){
+    getMembersClicks(){
       this.$axiosAPI
-          .get(process.env.VUE_APP_API_URL+"/user")
+          .get(process.env.VUE_APP_API_URL+"/clicks/user")
           .then(response => {
-            this.member.list = response.data
+            this.sumClicks(response.data)
             this.member.loading = false
-          }).catch(function (error) {
+          }).catch((error) => {
             this.snackbarText = "Erro ao consultar!"
             this.snackbar = true
           })
+    },
+    sumClicks(data){
+      let sumlist = []
+      for(let i = 0; i < data.length; i++){
+        sumlist[i] = data[i]
+        let clicksRed = 0;
+        let clicksPub = 0;
+        let saldoRed = 0;
+        let saldoPub = 0;
+        for (let click of data[i].clicks) {
+          if(click.role_id == 2){
+           clicksPub++
+           saldoPub += click.value
+          }
+          if(click.role_id == 3){
+           clicksRed++
+           saldoRed += click.value
+          }
+          
+        }
+        sumlist[i]['clickpub'] = clicksPub
+        sumlist[i]['clickred'] = clicksRed
+        sumlist[i]['clickspub'] = saldoPub
+        sumlist[i]['clicksred'] = saldoRed
+      }
+      this.member.list = sumlist
     },
     getUser(){
       this.$axiosAPI
@@ -336,7 +364,7 @@ export default {
             this.value_publisher = response.data.value_publisher
             this.clicks_redator = response.data.clicks_redator
             this.value_redator = response.data.value_redator
-          }).catch(function (error) {
+          }).catch((error) => {
             this.snackbarText = "Erro ao consultar!"
             this.snackbar = true
           })
@@ -348,7 +376,7 @@ export default {
             this.getMembersAccepted()
             this.snackbarText = "Aprovado!"
             this.snackbar = true
-          }).catch(function (error) {
+          }).catch((error) => {
             this.snackbarText = "Erro ao consultar!"
             this.snackbar = true
           })
@@ -361,7 +389,7 @@ export default {
             this.getMembersAccepted()
             this.snackbarText = "Não Aprovado!"
             this.snackbar = true
-          }).catch(function (error) {
+          }).catch((error) => {
             this.snackbarText = "Erro ao consultar!"
             this.snackbar = true
           })
@@ -373,7 +401,7 @@ export default {
   created() {
     this.getRole()
     if(this.role.list.includes(1)){
-      this.getMembers()
+      this.getMembersClicks()
       this.getMembersAccepted()
     }
     this.getCPM()

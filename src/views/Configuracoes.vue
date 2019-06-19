@@ -3,7 +3,7 @@
     <h1 class="subheading grey--text mx-4">Configurações</h1>
     <v-container grid-list-md>
       <v-layout row wrap>
-        <v-flex v-if="role.list.includes(1)" md12>
+        <v-flex v-if="role.list.includes(1)" md6>
           <v-card height="100%">
             <v-card-title primary-title>
               <h3 class="headline mb-0">Configurações Gerais</h3>
@@ -11,7 +11,7 @@
 
             <v-card-text>
               <v-layout row wrap>
-                <v-flex md6>
+                <v-flex md12>
                   <v-text-field
                     label="% Indicação"
                     v-model="config.perc_member"
@@ -27,43 +27,7 @@
             </v-card-actions>
           </v-card>
         </v-flex>
-        <v-flex md6>
-          <v-card height="100%">
-            <v-card-title primary-title>
-              <h3 class="headline mb-0">Configurações API</h3>
-            </v-card-title>
 
-            <v-card-text>
-              <v-layout row wrap>
-                <v-flex xs12>
-                  <v-text-field
-                    label="Wordpress ID"
-                    v-model="user.wp_user"
-                    :loading="user.loading"
-                  ></v-text-field>
-                </v-flex>
-                <v-flex xs12>
-                  <v-text-field
-                    label="Wordpress Login"
-                    v-model="user.wp_login"
-                    :loading="user.loading"
-                  ></v-text-field>
-                </v-flex>
-                <v-flex xs12>
-                  <v-text-field
-                    label="Wordpress Senha"
-                    v-model="user.wp_password"
-                    :loading="user.loading"
-                  ></v-text-field>
-                </v-flex>
-              </v-layout>
-            </v-card-text>
-
-            <v-card-actions>
-              <v-btn @click="saveUser" depressed color="primary">Gravar</v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-flex>
         <v-flex md6>
           <v-card height="100%">
             <v-card-title primary-title>
@@ -75,11 +39,29 @@
             <v-card-text>
               <v-layout row wrap>
                 <v-flex xs12>
+                  <v-select
+                      v-model="user.bank_id"
+                      :items="banks"
+                      :loading="user.loading" 
+                      item-text="name" 
+                      item-value="id"
+                      label="Banco"
+                    ></v-select>
+                </v-flex>
+                <v-flex xs12>
                   <v-text-field
-                    label="Banco"
-                    v-model="user.bank"
+                    label="Favorecido"
+                    v-model="user.favored"
                     :loading="user.loading"
                   ></v-text-field>
+                </v-flex>
+                <v-flex xs12>
+                  <v-select
+                      v-model="user.type"
+                      :items="types"
+                      :loading="user.loading" 
+                      label="Tipo"
+                    ></v-select>
                 </v-flex>
                 <v-flex xs12>
                   <v-text-field
@@ -100,6 +82,7 @@
                     label="CPF"
                     v-model="user.cpf"
                     :loading="user.loading"
+                     mask="###.###.###-##"
                   ></v-text-field>
                 </v-flex>
               </v-layout>
@@ -138,20 +121,24 @@
     mixins: [mixin],
     data: () => ({
       user:{
-        wp_user:'',
-        wp_login:'',
-        wp_password:'',
-        bank:'',
+        bank_id:'',
         agency:'',
         account:'',
         cpf:'',
         loading: true,
         id: '',
+        favored:'',
+        type:''
       },
       config:{
         perc_member:'',
         loading: true,
       },
+      banks:[],
+      types:[
+        {text:"Conta Corrente"},
+        {text:"Conta Poupança"}
+      ],
       snackbar: false,
       snackbarText: '',
     }),
@@ -178,14 +165,20 @@
             this.snackbar = true   
           })
       },
+      getBank(){
+        this.$axiosAPI
+          .get(process.env.VUE_APP_API_URL+"/bank/active")
+          .then(response => {
+            this.banks = response.data 
+          });
+      },
       saveUser(){
         this.$axiosAPI
           .put(process.env.VUE_APP_API_URL+"/user",{
             id: this.jwt_decode.sub,
-            wp_user: this.user.wp_user,
-            wp_login:this.user.wp_login,
-            wp_password:this.user.wp_password,
-            bank:this.user.bank,
+            favored:this.user.favored,
+            type:this.user.type,
+            bank_id:this.user.bank_id,
             agency:this.user.agency,
             account:this.user.account,
             cpf:this.user.cpf
@@ -216,6 +209,7 @@
     created() {
       this.getRole()
       this.getUser()
+      this.getBank()
       this.getConfigurations()
     }
   }

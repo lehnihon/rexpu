@@ -11,6 +11,7 @@ import Materias from './views/Materias'
 import Relatorios from './views/Relatorios'
 import SuporteTicket from './views/SuporteTicket'
 import DuvidasFrequentes from './views/DuvidasFrequentes'
+import Bancos from './views/Banco'
 import Financeiro from './views/Financeiro'
 import Configuracoes from './views/Configuracoes'
 import Indicacoes from './views/Indicacoes'
@@ -83,6 +84,12 @@ const router =  new Router({
       path: '/financeiro',
       name: 'financeiro',
       component: Financeiro,
+      beforeEnter: requireAuth
+    },
+    {
+      path: '/bancos',
+      name: 'bancos',
+      component: Bancos,
       beforeEnter: requireAuth
     },
     {

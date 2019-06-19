@@ -64,6 +64,7 @@ export default {
         { icon: 'assignment', text: 'Relatórios', route: '/relatorios' },
         { icon: 'question_answer', text: 'Suporte/Ticket', route: '/suporte-ticket' },
         { icon: 'help_outline', text: 'Dúvidas Frequentes', route: '/duvidas-frequentes' },
+        { icon: 'account_balance', text: 'Bancos', route: '/bancos' },
         { icon: 'credit_card', text: 'Financeiro', route: '/financeiro' },
         { icon: 'supervisor_account', text: 'Indicações', route: '/indicacoes' },
         { icon: 'build', text: 'Configurações', route: '/configuracoes' },
@@ -71,6 +72,7 @@ export default {
       links:[
         { icon: 'dashboard', text: 'Painel', route: '/' },
         { icon: 'computer', text: 'Matérias', route: '/materias' },
+        { icon: 'assignment', text: 'Relatórios', route: '/relatorios' },
         { icon: 'question_answer', text: 'Suporte/Ticket', route: '/suporte-ticket' },
         { icon: 'help_outline', text: 'Dúvidas Frequentes', route: '/duvidas-frequentes' },
         { icon: 'credit_card', text: 'Financeiro', route: '/financeiro' },

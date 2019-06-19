@@ -36,7 +36,7 @@
                             search
                           </v-icon>
                         </v-btn>
-                        <v-btn v-if="(role.list.includes(1))" class="mx-0" small fab flat @click="aproveTransaction(props.item.id)">
+                        <v-btn v-if="role.list.includes(1) && !props.item.done" class="mx-0" small fab flat @click="aproveTransaction(props.item.id)">
                           <v-icon> 
                             check_circle
                           </v-icon>
@@ -140,7 +140,7 @@
       </v-layout>
     </v-container>
     
-    <v-snackbar v-model="snackbar" bottom :timeout=1500>
+    <v-snackbar v-model="snackbar" bottom :timeout=2500>
       {{ snackbarText }}
       <v-btn color="pink" flat @click="snackbar = false">Close</v-btn>
     </v-snackbar>
@@ -282,8 +282,13 @@ export default {
             this.getFinancial()
             this.financial.new = false
           }).catch((error) => {
-            this.snackbarText = "Erro ao gravar!"
-            this.snackbar = true   
+            if(error.response){
+              this.snackbarText = error.response.data.error
+              this.snackbar = true
+            }else{
+              this.snackbarText = "Erro ao consultar!"
+              this.snackbar = true
+            }
           }).finally(() => {
             this.financial.valid = true
             this.financial.btnLoading = false

@@ -34,7 +34,10 @@
                           <v-icon> 
                             edit
                           </v-icon>
-                        </v-btn>    
+                        </v-btn>
+                        <v-icon v-if="props.item.cpm_a || props.item.cpm_b" small color="primary">
+                          star
+                        </v-icon>    
                       </td>
                     </template>
                     <v-alert

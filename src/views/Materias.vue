@@ -37,7 +37,7 @@
                             insert_link
                           </v-icon>
                         </v-btn>
-                        <v-btn v-if="role.list.includes(1)" :loading="linkLoading" small fab flat @click="deleteSubject(props.item.id)">
+                        <v-btn v-if="role.list.includes(1)" small fab flat @click="deleteSubject(props.item.id)">
                           <v-icon> 
                             delete
                           </v-icon>
@@ -83,6 +83,11 @@
                       <td>{{ props.item.title }}</td>
                       <td>{{ props.item.link }}</td>
                       <td>
+                        <v-btn v-if="role.list.includes(1)" small fab flat @click="deleteSuggestion(props.item.id)">
+                          <v-icon> 
+                            delete
+                          </v-icon>
+                        </v-btn>
                       </td>
                     </template>
                     <v-alert
@@ -225,8 +230,9 @@ export default {
           .then(response => {
             this.subject.list = response.data
             this.subject.loading = false
-          }).catch(function (error) {
-            
+          }).catch((error) => {
+            this.snackbarText = "Erro ao consultar matérias!"
+            this.snackbar = true   
           })
     },
     getSubjectWP(){
@@ -245,6 +251,9 @@ export default {
               this.snackbar = true
               this.getSubject()
             })
+        }).catch((error) => {
+          this.snackbarText = "Erro ao consultar blog!"
+          this.snackbar = true   
         })
     },
     generateLink(link){
@@ -263,8 +272,9 @@ export default {
           .then(response => {
             this.suggestion.list = response.data
             this.suggestion.loading = false
-          }).catch(function (error) {
-            
+          }).catch((error) => {
+            this.snackbarText = "Erro consular sugestões"
+            this.snackbar = true   
           })
     },
     saveSuggestion(){
@@ -304,6 +314,17 @@ export default {
             this.snackbarText = "Desativado com sucesso!"
             this.snackbar = true
             this.getSubject()
+          })
+      }
+    },
+    deleteSuggestion(id){
+      if(confirm("Deletar?")){
+        this.$axiosAPI
+          .delete(process.env.VUE_APP_API_URL+"/suggestion/"+id)
+          .then(response => {
+            this.snackbarText = "Deletado com sucesso!"
+            this.snackbar = true
+            this.getSuggestion()
           })
       }
     }
