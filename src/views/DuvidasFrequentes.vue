@@ -29,6 +29,12 @@
                       <td>{{ props.item.id }}</td>
                       <td v-html="props.item.question"></td>
                       <td>{{ props.item.created_at }}</td>
+                      <td><v-btn small fab flat @click="deleteAskedQuestions(props.item.id)">
+                          <v-icon> 
+                            delete
+                          </v-icon>
+                        </v-btn>
+                      </td>
                     </template>
                     <v-alert
                       v-slot:no-results
@@ -88,32 +94,22 @@
 
             <v-list>
               <v-list-group
-                v-for="item in asked_questions.items"
-                :key="item.title"
-                v-model="item.active"
+                v-for="item in asked_questions.list"
+                :key="item.id"
                 :prepend-icon="item.action"
                 no-action
               >
                 <template v-slot:activator>
-                  <v-list-tile>
-                    <v-list-tile-content>
-                      <v-list-tile-title v-html="item.title"></v-list-tile-title>
-                    </v-list-tile-content>
-                  </v-list-tile>
+                  <v-layout class="mt-2" row wrap >
+                    <v-flex class="ml-3" xs shrink>
+                      <v-icon>question_answer</v-icon>
+                    </v-flex>
+                    <v-flex xs v-html="item.question"></v-flex>
+                  </v-layout>
                 </template>
-
-                <v-list-tile
-                  v-for="subItem in item.items"
-                  :key="subItem.title"
-                >
-                  <v-list-tile-content>
-                    <v-list-tile-title v-html="subItem.title"></v-list-tile-title>
-                  </v-list-tile-content>
-
-                  <v-list-tile-action>
-                    <v-icon>{{ subItem.action }}</v-icon>
-                  </v-list-tile-action>
-                </v-list-tile>
+                <v-layout class="mt-2" row wrap >
+                  <v-flex class="pl-3" xs12 v-html="item.answer"></v-flex>
+                </v-layout>
               </v-list-group>
             </v-list>
           </v-card>
@@ -147,7 +143,8 @@ export default {
       headers: [
         { text: "ID", value: "id" },
         { text: "Pergunta", value: "question" },
-        { text: "Data", value: "created_at" }
+        { text: "Data", value: "created_at" },
+        { text: 'Ações', sortable: false }
       ],
       list:[],
       search:'',
@@ -189,6 +186,17 @@ export default {
       setTimeout(() => {
         this.$refs.asked_questionsForm.scrollIntoView({block:"end",behavior:"smooth"})
       }, 250);
+    },
+    deleteAskedQuestions(id){
+      if(confirm("Deletar?")){
+        this.$axiosAPI
+          .delete(process.env.VUE_APP_API_URL+"/asked-questions/"+id)
+          .then(response => {
+            this.snackbarText = "Deletado com sucesso!"
+            this.snackbar = true
+            this.getAskedQuestions()
+          })
+      }
     },
     saveAskedQuestions(){
       if (this.$refs.asked_questions.validate()){

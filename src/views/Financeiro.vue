@@ -146,52 +146,22 @@
     </v-snackbar>
     
     <v-dialog v-model="dialog" width="500">
-      <v-card>
-        <v-list>
-          <v-list-tile avatar>  
-            <v-list-tile-action class="headline mr-3">
-              ID
-            </v-list-tile-action>
-            <v-list-tile-content>
-             {{financial.show.id}}
-            </v-list-tile-content> 
-          </v-list-tile>
-          <v-divider inset></v-divider>
-          <v-list-tile avatar>  
-            <v-list-tile-action class="headline mr-3">
-              Estado
-            </v-list-tile-action>
-            <v-list-tile-content>
-             {{financial.show.title}}
-            </v-list-tile-content> 
-          </v-list-tile>
-          <v-divider inset></v-divider>
-          <v-list-tile avatar>  
-            <v-list-tile-action class="headline mr-3">
-              Valor
-            </v-list-tile-action>
-            <v-list-tile-content>
-             R${{financial.show.amount}}
-            </v-list-tile-content> 
-          </v-list-tile>
-          <v-divider inset></v-divider>
-          <v-list-tile avatar>  
-            <v-list-tile-action class="headline mr-3">
-              Obs
-            </v-list-tile-action>
-            <v-list-tile-content v-html="financial.show.obs">
-            </v-list-tile-content> 
-          </v-list-tile>
-          <v-divider inset></v-divider>
-          <v-list-tile avatar>  
-            <v-list-tile-action class="headline mr-3">
-              Recibo
-            </v-list-tile-action>
-            <v-list-tile-content>
-              <v-btn target="_blank" :href="financial.show.link" depressed>Baixar</v-btn>
-            </v-list-tile-content> 
-          </v-list-tile>
-        </v-list>
+      <v-card class="py-3 px-3">
+        <v-layout row wrap>
+          <v-flex xs12 class="mb-2"><strong>ID: </strong> {{financial.show.id}}</v-flex>
+          <v-flex xs12 class="mb-2" v-if="financial.show.user"><strong>USUÁRIO: </strong>  {{financial.show.user.name}}</v-flex>
+          <v-flex xs12 class="mb-2" v-if="financial.show.user"><strong>FAVORECIDO: </strong>  {{financial.show.user.favored}}</v-flex>
+          <v-flex xs12 class="mb-2" v-if="financial.show.user"><strong>BANCO: </strong>  {{financial.show.user.bank.name}}</v-flex>
+          <v-flex xs12 class="mb-2" v-if="financial.show.user"><strong>TIPO: </strong>  {{financial.show.user.type}}</v-flex>
+          <v-flex xs12 class="mb-2" v-if="financial.show.user"><strong>AGÊNCIA: </strong>  {{financial.show.user.agency}}</v-flex>
+          <v-flex xs12 class="mb-2" v-if="financial.show.user"><strong>CONTA: </strong>  {{financial.show.user.account}}</v-flex>
+          <v-flex xs12 class="mb-2" v-if="financial.show.user"><strong>CPF: </strong>  {{financial.show.user.cpf}}</v-flex>
+          <v-flex xs12 class="mb-2"><strong>STATUS: </strong>  {{financial.show.title}}</v-flex>
+          <v-flex xs12 class="mb-2"><strong>VALOR: </strong>R${{financial.show.amount}}</v-flex>
+          <v-flex xs12 class="mb-2" v-html="financial.show.obs"></v-flex>
+          <v-flex xs12 class="mb-2"><strong>RECIBO: </strong> <v-btn v-if="financial.show.link" target="_blank" :href="financial.show.link" depressed>VER</v-btn> </v-flex>
+        </v-layout>
+    
       </v-card>
     </v-dialog>
   </div>
@@ -225,7 +195,12 @@ export default {
         obs:'',
         amount:'',
         title:'',
-        link:''
+        link:'',
+        user:{
+          bank:{
+            name:''
+          }
+        }
       },
       list:[],
       search:'',
@@ -279,6 +254,7 @@ export default {
             this.snackbarText = "Salvo com sucesso!"
             this.snackbar = true
             this.$refs.financialNew.reset()
+            this.financial.form.obs = ''
             this.getFinancial()
             this.financial.new = false
           }).catch((error) => {
@@ -310,11 +286,11 @@ export default {
     },
     showTransaction(transaction){
       this.dialog = true
-      this.financial.show.id = transaction.id
-      this.financial.show.link = process.env.VUE_APP_API_URL+"/receipts/"+transaction.receipt
-      this.financial.show.title = transaction.title
-      this.financial.show.amount = transaction.amount
-      this.financial.show.obs = transaction.obs
+      this.financial.show = transaction
+      if(transaction.receipt != ''){
+        this.financial.show.link = process.env.VUE_APP_API_URL+"/receipts/"+transaction.receipt
+      }
+      console.log(this.financial.show)
     },
     saveTransaction(){
       if (this.$refs.financial.validate()) {

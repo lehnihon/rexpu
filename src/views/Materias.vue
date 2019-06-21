@@ -83,6 +83,11 @@
                       <td>{{ props.item.title }}</td>
                       <td>{{ props.item.link }}</td>
                       <td>
+                        <v-btn class="mx-0" small fab flat @click="showSuggestionDetails(props.item)">
+                          <v-icon> 
+                            search
+                          </v-icon>
+                        </v-btn>
                         <v-btn v-if="role.list.includes(1)" small fab flat @click="deleteSuggestion(props.item.id)">
                           <v-icon> 
                             delete
@@ -166,6 +171,15 @@
       {{ snackbarText }}
       <v-btn color="pink" flat @click="snackbar = false">Close</v-btn>
     </v-snackbar>
+    <v-dialog v-model="dialog" width="500">
+      <v-card class="py-3 px-3">
+        <v-layout row wrap>
+          <v-flex xs12 class="mb-2"><strong>TÍTULO: </strong>{{suggestion.show.title}}</v-flex>
+          <v-flex xs12 class="mb-2"><strong>LINK: </strong>{{suggestion.show.link}}</v-flex>
+          <v-flex xs12 v-html="suggestion.show.description"></v-flex>
+        </v-layout>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
@@ -205,6 +219,11 @@ export default {
         link:'',
         user_id:''
       },
+      show:{
+        title:'',
+        description:'',
+        link:''
+      },
       btnLoading:false
     },
     subject:{
@@ -220,6 +239,7 @@ export default {
       loading:true,
       valid:true
     },
+    dialog:false,
     subjectwp:[]
   }),
   methods: {
@@ -305,6 +325,10 @@ export default {
       setTimeout(() => {
         this.$refs.sugestaoForm.scrollIntoView({block:"end",behavior:"smooth"})
       }, 250);
+    },
+    showSuggestionDetails(item){
+      this.dialog = true
+      this.suggestion.show = item
     },
     deleteSubject(idSubject){
       if(confirm("Desativar?")){
