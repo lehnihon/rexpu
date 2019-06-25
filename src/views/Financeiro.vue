@@ -29,7 +29,8 @@
                       <td>{{ props.item.id }}</td>
                       <td>{{ props.item.title }}</td>
                       <td>{{ props.item.user.name }}</td>
-                      <td>R${{ props.item.amount }}</td>
+                      <td>{{ formatMoney(props.item.amount) }}</td>
+                      <td>{{ formatDate(props.item.created_at) }}</td>
                       <td>
                         <v-btn class="mx-0" small fab flat @click="showTransaction(props.item)">
                           <v-icon> 
@@ -76,9 +77,9 @@
                   <v-text-field
                     label="Valor"
                     prefix="R$"
-                    mask="##########"
-                    :rules="[v => !!v || 'Obs é obrigatório']"
-                    v-model="financial.form.amount"
+                    v-money="money"
+                    :rules="[v => !!v || 'Valor é obrigatório']"
+                    v-model.lazy="financial.form.amount"
                   ></v-text-field>
                 </v-flex>
               </v-layout>
@@ -151,13 +152,13 @@
           <v-flex xs12 class="mb-2"><strong>ID: </strong> {{financial.show.id}}</v-flex>
           <v-flex xs12 class="mb-2" v-if="financial.show.user"><strong>USUÁRIO: </strong>  {{financial.show.user.name}}</v-flex>
           <v-flex xs12 class="mb-2" v-if="financial.show.user"><strong>FAVORECIDO: </strong>  {{financial.show.user.favored}}</v-flex>
-          <v-flex xs12 class="mb-2" v-if="financial.show.user"><strong>BANCO: </strong>  {{financial.show.user.bank.name}}</v-flex>
+          <v-flex xs12 class="mb-2" v-if="financial.show.user.bank"><strong>BANCO: </strong>  {{financial.show.user.bank.name}}</v-flex>
           <v-flex xs12 class="mb-2" v-if="financial.show.user"><strong>TIPO: </strong>  {{financial.show.user.type}}</v-flex>
           <v-flex xs12 class="mb-2" v-if="financial.show.user"><strong>AGÊNCIA: </strong>  {{financial.show.user.agency}}</v-flex>
           <v-flex xs12 class="mb-2" v-if="financial.show.user"><strong>CONTA: </strong>  {{financial.show.user.account}}</v-flex>
           <v-flex xs12 class="mb-2" v-if="financial.show.user"><strong>CPF: </strong>  {{financial.show.user.cpf}}</v-flex>
           <v-flex xs12 class="mb-2"><strong>STATUS: </strong>  {{financial.show.title}}</v-flex>
-          <v-flex xs12 class="mb-2"><strong>VALOR: </strong>R${{financial.show.amount}}</v-flex>
+          <v-flex xs12 class="mb-2"><strong>VALOR: </strong>{{formatMoney(financial.show.amount)}}</v-flex>
           <v-flex xs12 class="mb-2" v-html="financial.show.obs"></v-flex>
           <v-flex xs12 class="mb-2"><strong>RECIBO: </strong> <v-btn v-if="financial.show.link" target="_blank" :href="financial.show.link" depressed>VER</v-btn> </v-flex>
         </v-layout>
@@ -171,6 +172,7 @@
 import axios from "axios";
 import mixin from "../mixin";
 import { VueEditor } from "vue2-editor";
+import {VMoney} from 'v-money'
 export default {
   components: {VueEditor},
   mixins: [mixin],
@@ -185,9 +187,10 @@ export default {
     financial:{
       headers: [
         { text: "ID", value: "id" },
-        { text: "Título", value: "question" },
+        { text: "Título", value: "title" },
         { text: "Usuário", value: "user.name" },
         { text: "Valor", value: "amount" },
+        { text: "Data", value: "created_at" },
         { text: "Ações", sortable: false }
       ],
       show:{
@@ -223,9 +226,25 @@ export default {
       loading:true,
       btnLoading:false,
       btAdmLoading:false
+    },
+    money: {
+      decimal: ',',
+      precision: 2
     }
   }),
+  directives: {money: VMoney},
   methods: {
+    formatMoney(money){
+      return "R$"+money.toString().replace(".",",")
+    },
+    formatDate(dt) {
+      if(dt == null){
+        return '';
+      }
+      var bits = dt.split(/\D/);
+      var date = new Date(bits[0], bits[1], bits[2], bits[3], bits[4]);
+      return date.getDate() + '/' + date.getMonth() + '/' +  date.getFullYear();
+    },
     getFinancialAdmin() {
       this.$axiosAPI
         .get(process.env.VUE_APP_API_URL+"/financial")

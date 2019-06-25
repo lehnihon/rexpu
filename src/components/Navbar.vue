@@ -65,8 +65,10 @@ export default {
         { icon: 'question_answer', text: 'Suporte/Ticket', route: '/suporte-ticket' },
         { icon: 'help_outline', text: 'Dúvidas Frequentes', route: '/duvidas-frequentes' },
         { icon: 'account_balance', text: 'Bancos', route: '/bancos' },
+        { icon: 'business', text: 'Parceiros', route: '/parceiros' },
+        { icon: 'timeline', text: 'Ganhos', route: '/ganhos' },
         { icon: 'credit_card', text: 'Financeiro', route: '/financeiro' },
-        { icon: 'supervisor_account', text: 'Indicações', route: '/indicacoes' },
+        { icon: 'group_add', text: 'Indicações', route: '/indicacoes' },
         { icon: 'build', text: 'Configurações', route: '/configuracoes' },
       ],
       links:[

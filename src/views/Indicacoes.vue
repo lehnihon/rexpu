@@ -27,9 +27,9 @@
                       <td>{{ props.item.user.name }}</td>
                       <td>{{ props.item.indicated.name }}</td>
                       <td>{{ props.item.clicks }}</td>
-                      <td>R${{ props.item.amount }}</td>
+                      <td>{{ formatMoney(props.item.amount) }}</td>
                       <td>
-                        <v-btn v-if="checkDays(props.item.created_at)" small fab flat @click="aproveIndication(props.item.id)">
+                        <v-btn small fab flat @click="aproveIndication(props.item.id)">
                           <v-icon> 
                             check_circle
                           </v-icon>
@@ -81,6 +81,9 @@ export default {
     },
   }),
   methods:{
+    formatMoney(money){
+      return "R$"+money.toString().replace(".",",")
+    },
     getIndications(){
       this.$axiosAPI
         .get(process.env.VUE_APP_API_URL+"/indication")

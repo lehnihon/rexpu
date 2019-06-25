@@ -10,6 +10,7 @@
   "dependencies": {
     "axios": "^0.18.0",
     "core-js": "^2.6.5",
+    "v-money": "^0.8.1",
     "vue": "^2.6.6",
     "vue-json-excel": "^0.2.98",
     "vue-router": "^3.0.1",

@@ -28,8 +28,8 @@
                     <template v-slot:items="props">
                       <td>{{ props.item.id }}</td>
                       <td>{{ props.item.role.role }}</td>
-                      <td>R${{ props.item.amount }}</td>
-                      <td>{{ props.item.created_at }}</td>
+                      <td>{{ formatMoney(props.item.amount) }}</td>
+                      <td>{{ formatDate(props.item.created_at) }}</td>
                     </template>
                     <v-alert
                       v-slot:no-results
@@ -75,8 +75,8 @@
                       label="Valor"
                       :rules="[v => !!v || 'Valor é obrigatório']"
                       prefix="R$"
-                      :mask="cpm.maskamount"
-                      v-model="cpm.form.amount"
+                      v-money="money"
+                      v-model.lazy="cpm.form.amount"
                     ></v-text-field>
                   </v-flex>
                 </v-layout>
@@ -99,6 +99,7 @@
 <script>
 import axios from "axios";
 import mixin from "../mixin";
+import {VMoney} from 'v-money'
 export default {
   components: {
   },
@@ -117,7 +118,6 @@ export default {
       list:[],
       search:'',
       new:false,
-      maskamount:'##########',
       tipos:[
         {id:2,text:'Publisher'},
         {id:3,text:'Redator'}
@@ -128,9 +128,25 @@ export default {
       },
       btnLoading:false,
       loading:true
+    },
+    money: {
+      decimal: ',',
+      precision: 2
     }
   }),
+  directives: {money: VMoney},
   methods: {
+    formatMoney(money){
+      return "R$"+money.toString().replace(".",",")
+    },
+    formatDate(dt) {
+      if(dt == null){
+        return '';
+      }
+      var bits = dt.split(/\D/);
+      var date = new Date(bits[0], bits[1], bits[2], bits[3], bits[4]);
+      return date.getDate() + '/' + date.getMonth() + '/' +  date.getFullYear();
+    },
     getCPM() {
       this.$axiosAPI
         .get(process.env.VUE_APP_API_URL+"/cpm")
@@ -146,7 +162,6 @@ export default {
         this.$axiosAPI
           .post(process.env.VUE_APP_API_URL+"/cpm",this.cpm.form)
           .then(response => {
-            
             this.snackbarText = "Salvo com sucesso!"
             this.snackbar = true
             this.$refs.cpm.reset()

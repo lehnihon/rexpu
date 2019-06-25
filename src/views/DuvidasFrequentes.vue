@@ -28,7 +28,6 @@
                     <template v-slot:items="props">
                       <td>{{ props.item.id }}</td>
                       <td v-html="props.item.question"></td>
-                      <td>{{ props.item.created_at }}</td>
                       <td><v-btn small fab flat @click="deleteAskedQuestions(props.item.id)">
                           <v-icon> 
                             delete
@@ -143,7 +142,6 @@ export default {
       headers: [
         { text: "ID", value: "id" },
         { text: "Pergunta", value: "question" },
-        { text: "Data", value: "created_at" },
         { text: 'Ações', sortable: false }
       ],
       list:[],

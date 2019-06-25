@@ -35,7 +35,7 @@
                       <td>{{ props.item.id }}</td>
                       <td>{{ props.item.title }}</td>
                       <td>{{ props.item.user.name }}</td>
-                      <td>{{ props.item.created_at }}</td>
+                      <td>{{ formatDate(props.item.created_at) }}</td>
                       <td>
                         <v-btn small fab flat @click="showDetails(props.item)">
                           <v-icon class="mr-2">search</v-icon>
@@ -205,6 +205,14 @@ export default {
     }
   }),
   methods: {
+    formatDate(dt) {
+      if(dt == null){
+        return '';
+      }
+      var bits = dt.split(/\D/);
+      var date = new Date(bits[0], bits[1], bits[2], bits[3], bits[4]);
+      return date.getDate() + '/' + date.getMonth() + '/' +  date.getFullYear();
+    },
     getSuportTicketAdmin() {
       this.$axiosAPI
         .get(

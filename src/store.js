@@ -49,6 +49,8 @@ export default new Vuex.Store({
     logout: (state) => {
       state.accessToken = null;
       state.accessTokenWP = null;
+      state.userWP = null;
+      state.accessTokenExpire = null;
     },
     updateAccessTokenWP: (state, accessTokenWP) => {
       state.accessTokenWP = accessTokenWP;
@@ -103,6 +105,9 @@ export default new Vuex.Store({
     },
     logout({ commit }) {
       localStorage.removeItem('accessToken');
+      localStorage.removeItem('accessTokenWP');
+      localStorage.removeItem('userWP');
+      localStorage.removeItem('accessTokenExpire');
       commit('logout');
       router.push('/login');
     }

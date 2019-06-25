@@ -30,7 +30,7 @@
                           :src="props.item.wp_subject_img"
                           width="100"
                         ></v-img></td>
-                      <td>{{ props.item.created_at }}</td>
+                      <td>{{ formatDate(props.item.created_at) }}</td>
                       <td>
                         <v-btn v-if="(role.list.includes(1) || role.list.includes(2))" :loading="linkLoading" small fab flat @click="generateLink(props.item.users[0].pivot.link_hash)">
                           <v-icon> 
@@ -243,6 +243,14 @@ export default {
     subjectwp:[]
   }),
   methods: {
+    formatDate(dt) {
+      if(dt == null){
+        return '';
+      }
+      var bits = dt.split(/\D/);
+      var date = new Date(bits[0], bits[1], bits[2], bits[3], bits[4]);
+      return date.getDate() + '/' + date.getMonth() + '/' +  date.getFullYear();
+    },
     getSubject(){
       this.linkReal = process.env.VUE_APP_API_URL+"link/";
       this.$axiosAPI

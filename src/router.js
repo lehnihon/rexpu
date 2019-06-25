@@ -12,6 +12,8 @@ import Relatorios from './views/Relatorios'
 import SuporteTicket from './views/SuporteTicket'
 import DuvidasFrequentes from './views/DuvidasFrequentes'
 import Bancos from './views/Banco'
+import Parceiros from './views/Parceiros'
+import Ganhos from './views/Ganhos'
 import Financeiro from './views/Financeiro'
 import Configuracoes from './views/Configuracoes'
 import Indicacoes from './views/Indicacoes'
@@ -90,6 +92,18 @@ const router =  new Router({
       path: '/bancos',
       name: 'bancos',
       component: Bancos,
+      beforeEnter: requireAuth
+    },
+    {
+      path: '/parceiros',
+      name: 'parceiros',
+      component: Parceiros,
+      beforeEnter: requireAuth
+    },
+    {
+      path: '/ganhos',
+      name: 'ganhos',
+      component: Ganhos,
       beforeEnter: requireAuth
     },
     {

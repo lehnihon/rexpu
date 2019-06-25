@@ -31,7 +31,7 @@
                     label="Tipo"
                   ></v-select>
                 </v-flex>
-                <v-flex xs v-if="option == 2 || option == 3 || option == 10">
+                <v-flex xs v-if="option == 2 || option == 3 || option == 4 || option == 10">
                   <v-menu
                     ref="dt1"
                     v-model="dt1"
@@ -57,7 +57,7 @@
                     <v-date-picker v-model="date1" no-title @input="dt1 = false"></v-date-picker>
                   </v-menu>
                 </v-flex>
-                <v-flex xs v-if="option == 2 || option == 3 || option == 10">
+                <v-flex xs v-if="option == 2 || option == 3 || option == 4 || option == 10">
                   <v-menu
                     ref="dt2"
                     v-model="dt2"
@@ -246,7 +246,7 @@
                       <td>{{ props.item.title }}</td>
                       <td>R${{ props.item.value }}</td>
                       <td>{{ props.item.user.name }}</td>
-                      <td>{{ props.item.created_at }}</td>
+                      <td>{{ formatDateTime(props.item.created_at) }}</td>
                     </template>
                     <template v-slot:footer>
                       <td><strong>Total</strong></td>
@@ -268,6 +268,64 @@
             <v-card-actions>
               <download-excel
                 :data   = "reportd.list"
+                
+                class = "v-btn v-btn--depressed theme--light primary">
+                Baixar Relatório
+              </download-excel>
+            </v-card-actions>
+          </v-card>
+        </v-flex>
+
+
+        <!-- RELATORIO 4 -->
+
+        <v-flex xs12 v-show="report.new" ref="reportFormE" v-if="option == 4">
+          <v-card height="100%">
+            <v-toolbar dark color="primary">
+              <v-toolbar-title>Relatório</v-toolbar-title>
+              <v-spacer></v-spacer>
+              <v-btn icon dark @click="report.new = false">
+                <v-icon>close</v-icon>
+              </v-btn>
+            </v-toolbar>
+            <v-card-text>
+              <v-layout row wrap>
+                <v-flex xs12>
+                  <v-text-field
+                    v-model="reporte.search"
+                    append-icon="search"
+                    label="Procurar"
+                    single-line
+                    hide-details
+                  ></v-text-field>
+                </v-flex>
+                <v-flex xs12>
+                  <v-data-table disable-initial-sort :headers="reporte.headers" :items="reporte.list" :search="reporte.search" :loading="reporte.loading">
+                    <template v-slot:items="props">
+                      <td>{{ props.item.id }}</td>
+                      <td>{{ props.item.partner.name }}</td>
+                      <td>R${{ props.item.value }}</td>
+                      <td>{{ formatDate(props.item.date_earning) }}</td>
+                    </template>
+                    <template v-slot:footer>
+                      <td><strong>Total</strong></td>
+                      <td></td>
+                      <td>R${{reporte.total}}</td>
+                      <td></td>
+                    </template>
+                    <v-alert
+                      v-slot:no-results
+                      :value="true"
+                      color="error"
+                      icon="warning"
+                    >Your search for "{{ sugestoesSearch }}" found no results.</v-alert>
+                  </v-data-table>
+                </v-flex>
+              </v-layout>
+            </v-card-text>
+            <v-card-actions>
+              <download-excel
+                :data   = "reporte.list"
                 
                 class = "v-btn v-btn--depressed theme--light primary">
                 Baixar Relatório
@@ -366,7 +424,8 @@ export default {
     options:[
       {id:1,text:'Total Gerado na Plataforma'},
       {id:2,text:'Rendimento por Usuário'},
-      {id:3,text:'Financeiro'}
+      {id:3,text:'Financeiro'},
+      {id:4,text:'Ganhos'}
     ],
     optionsb:[
       {id:10,text:'Rendimento por Usuário'}
@@ -437,6 +496,19 @@ export default {
       search:'',
       total:0
     },
+    reporte:{
+      headers:[
+        { text: "ID", value: "id" },
+        { text: "Parceiro", value: "partner.name" },
+        { text: "Ganho", value: "value" },
+        { text: "Data", value: "date_earning" }
+      ],
+      new:false,
+      list:[],
+      loading:true,
+      search:'',
+      total:0
+    },
     date1: new Date().toISOString().substr(0, 10),
     dateFormatted1: vm.formatDate(new Date().toISOString().substr(0, 10)),
     dt1: false,
@@ -445,6 +517,14 @@ export default {
     dt2: false
   }),
   methods: {
+    formatDateTime(dt) {
+      if(dt == null){
+        return '';
+      }
+      var bits = dt.split(/\D/);
+      var date = new Date(bits[0], bits[1], bits[2], bits[3], bits[4]);
+      return date.getDate() + '/' + date.getMonth() + '/' +  date.getFullYear();
+    },
     formatDate (date) {
       if (!date) return null
 
@@ -468,9 +548,24 @@ export default {
       if(this.option == 3 ){
         this.getTransactions()
       }
+      if(this.option == 4 ){
+        this.getEarning()
+      } 
       if(this.option == 10){
         this.getSubjectByUser();
       }
+    },
+    getEarning() {
+      this.$axiosAPI
+        .post(process.env.VUE_APP_API_URL+"/earning/report",{
+          from:this.date1,
+          to:this.date2
+        })
+        .then(response => {
+          this.reporte.list = response.data
+          this.generateTotalsE(response.data)
+          this.reporte.loading = false;
+        });
     },
     getMembers(){
       this.$axiosAPI
@@ -587,6 +682,12 @@ export default {
       this.reportd.total = 0;
       for (let val of list) {
         this.reportd.total += val.value
+      }
+    },
+    generateTotalsE(list){
+      this.reporte.total = 0;
+      for (let val of list) {
+        this.reporte.total += val.value
       }
     },
   },
