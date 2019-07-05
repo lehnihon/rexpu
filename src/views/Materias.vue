@@ -25,12 +25,12 @@
                     <template v-slot:items="props">
                       <td>{{ props.item.id }}</td>
                       <td>{{ props.item.title }}</td>
-                      <td>{{ linkReal+props.item.users[0].pivot.link_hash }}</td>
                       <td><v-img
                           :src="props.item.wp_subject_img"
                           width="100"
                         ></v-img></td>
                       <td>{{ formatDate(props.item.created_at) }}</td>
+                      <td v-if="(role.list.includes(1) || role.list.includes(2))">{{ linkReal+props.item.users[0].pivot.link_hash }}</td>
                       <td>
                         <v-btn v-if="(role.list.includes(1) || role.list.includes(2))" :loading="linkLoading" small fab flat @click="generateLink(props.item.users[0].pivot.link_hash)">
                           <v-icon> 
@@ -230,9 +230,9 @@ export default {
       headers:[
         {text:'ID',value:'id'},
         {text:'Título',value:'title'},
-        {text:'Link', sortable: false},
         {text:'Foto', sortable: false},
         {text:'Data',value:'created_at'},
+        {text:'Link', sortable: false},
         { text: 'Ações', sortable: false }
       ],
       list:[],
@@ -265,7 +265,7 @@ export default {
     },
     getSubjectWP(){
       axios
-        .get(process.env.VUE_APP_WP_URL + "/wp-json/wp/v2/posts/?author="+this.userWP+"&per_page=1&status=publish&_embed&orderby=modified", {
+        .get(process.env.VUE_APP_WP_URL + "/wp-json/wp/v2/posts/?author="+this.userWP+"&per_page=50&status=publish&_embed&orderby=modified", {
           headers: {
             'Authorization': "Basic " + this.accessTokenWP
           }
@@ -301,7 +301,7 @@ export default {
             this.suggestion.list = response.data
             this.suggestion.loading = false
           }).catch((error) => {
-            this.snackbarText = "Erro consular sugestões"
+            this.snackbarText = "Erro consultar sugestões"
             this.snackbar = true   
           })
     },
@@ -364,7 +364,9 @@ export default {
   created() {
     this.getRole()
     this.getSubject()
-    this.getSubjectWP()
+    if((role.list.includes(1) || role.list.includes(3))){
+      this.getSubjectWP()
+    }
     this.getSuggestion()
   }
 };

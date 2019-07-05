@@ -145,6 +145,13 @@
                   </v-flex>
                   <v-flex xs12>
                     <v-text-field
+                      label="WhatsApp"
+                      v-model="member.edit.form.phone"
+                      mask="(##) #####-####"
+                    ></v-text-field>
+                  </v-flex>
+                  <v-flex xs12>
+                    <v-text-field
                       label="Novo E-mail"
                       v-model="member.edit.form.email"
                     ></v-text-field>
@@ -232,6 +239,7 @@ export default {
           password:'',
           accepted:'',
           active:'',
+          phone:'',
           role:{
             adm:false,
             pub:false,
@@ -283,11 +291,12 @@ export default {
         this.member.btnLoading = true
         this.member.username = Math.random().toString(36).substr(2, 20)
         axios
-        .post(process.env.VUE_APP_WP_URL + "/wp-json/wp/v2/users",{
+        .post(process.env.VUE_APP_WP_URL + "wp-json/wp/v2/users",{
             username:this.member.username,
             name:this.member.form.name,
             email:this.member.form.email,
-            password:this.member.form.password
+            password:this.member.form.password,
+            roles:[ "contributor" ]
           },
           {
           headers: {
@@ -296,7 +305,7 @@ export default {
         }).then(response => {
           this.member.form.wp_user = response.data.id
           this.member.form.wp_login = this.member.username
-          this.member.form.wp_password = response.wp_password
+          this.member.form.wp_password = this.member.form.password
           this.$axiosAPI
           .post(process.env.VUE_APP_API_URL+"/user",this.member.form)
             .then(response => {
@@ -311,7 +320,7 @@ export default {
               this.snackbar = true   
             })
         }).catch((error) => {
-          this.snackbarText = "Erro ao criar o usuário wp!"
+          this.snackbarText = "Email já existe!"
           this.snackbar = true   
         }).finally(() => {
           this.member.valid = true
@@ -325,6 +334,7 @@ export default {
       }, 250);
       this.member.edit.form.id = member.id
       this.member.edit.form.name = member.name
+      this.member.edit.form.phone = member.phone
       this.member.edit.form.accepted = (member.accepted == '0') ?  false : true
       this.member.edit.form.active = (member.active == '0') ? false : true
       this.member.edit.form.cpm_a = member.cpm_a

@@ -12,7 +12,7 @@
         <v-icon right>exit_to_app</v-icon>
       </v-btn>
     </v-toolbar>
-    <v-navigation-drawer :mini-variant.sync="mini" v-model="drawer"  fixed app class="primary">
+    <v-navigation-drawer v-model="drawer"  fixed app class="primary">
       <v-list>
         <v-list-tile avatar>
           <v-list-tile-avatar>
@@ -54,8 +54,7 @@ export default {
   mixins: [mixin],
   data() {
     return {
-      mini: true,
-      drawer:false,
+      drawer:true,
       linksAdmin:[
         { icon: 'dashboard', text: 'Painel', route: '/' },
         { icon: 'attach_money', text: 'CPM', route: '/cpm' },

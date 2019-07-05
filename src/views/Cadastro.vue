@@ -48,6 +48,14 @@
                   :rules="[v => /.+@.+/.test(v) || 'Email inválido']"
                 ></v-text-field>
                 <v-text-field
+                  v-model="form.phone"
+                  prepend-icon="phone"
+                  name="whatsapp"
+                  label="WhatsApp"
+                  mask="(##) #####-####"
+                  type="text"
+                ></v-text-field>
+                <v-text-field
                   v-model="form.passwordb"
                   prepend-icon="lock"
                   name="senhaa"
@@ -119,6 +127,7 @@ export default {
       name: null,
       surname: null,
       email:null,
+      phone:null,
       password:null,
       passwordb:null,
       fonts:null,
@@ -135,11 +144,12 @@ export default {
         this.form.name = this.form.name+" "+this.form.surname
         this.username = Math.random().toString(36).substr(2, 20)
         axios
-        .post(process.env.VUE_APP_WP_URL + "/wp-json/wp/v2/users",{
+        .post(process.env.VUE_APP_WP_URL + "wp-json/wp/v2/users",{
             username:this.username,
             name:this.form.name,
             email:this.form.email,
-            password:this.form.password
+            password:this.form.password,
+            roles:[ "contributor" ]
           },
           {
           headers: {
@@ -148,21 +158,26 @@ export default {
         }).then(response => {
           this.form.wp_user = response.data.id
           this.form.wp_login = this.username
-          this.form.wp_password = response.wp_password
+          this.form.wp_password = this.form.password
           axios
             .post(process.env.VUE_APP_API_URL+"/user",this.form)
             .then(response => {
               this.valid = true
               this.btnLoading = false
-              this.snackbarText = "Salvo com sucesso!"
+              this.snackbarText = "Conta criada com sucesso!"
               this.snackbar = true
               this.$refs.member.reset()
             }).catch(error => {
+              this.valid = true
+              this.btnLoading = false
               this.snackbarText = "Erro ao gravar!"
               this.snackbar = true   
             })
-        }).catch((error) => {
-          this.snackbarText = "Erro ao criar o usuário wp!"
+        }).catch(error => {
+          console.log(error)
+          this.btnLoading = false
+          this.valid = true
+          this.snackbarText = "Email já existe!"
           this.snackbar = true   
         })
       }
