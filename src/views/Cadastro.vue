@@ -7,11 +7,9 @@
         </v-flex>
         <v-flex xsauto>
         </v-flex>
-        <v-flex xs1>
-          <v-btn small flat href="/cadastro" class="white--text"><v-icon class="mr-2">person_pin</v-icon> Cadastro</v-btn>
-        </v-flex>
-        <v-flex xs1>
-          <v-btn small flat href="/login" class="white--text"><v-icon class="mr-2">vpn_key</v-icon> Entrar</v-btn>
+        <v-flex xs3>
+          <v-btn small flat to="/cadastro" class="white--text"><v-icon class="mr-2">person_pin</v-icon> Cadastro</v-btn>
+          <v-btn small flat to="/login" class="white--text"><v-icon class="mr-2">vpn_key</v-icon> Entrar</v-btn>
         </v-flex>
       </v-layout>
       <v-layout align-center justify-center>
@@ -23,7 +21,7 @@
               <p class="text-xs-center">Registre sua conta abaixo!</p>
               <v-form ref="member" v-model="valid" lazy-validation >
                 <v-text-field
-                  v-model="form.name"
+                  v-model="form.name_inc"
                   prepend-icon="person"
                   name="nome"
                   label="Nome"
@@ -126,6 +124,7 @@ export default {
     form:{
       name: null,
       surname: null,
+      name_inc:null,
       email:null,
       phone:null,
       password:null,
@@ -141,7 +140,7 @@ export default {
       if (this.$refs.member.validate()) {
         this.valid = false
         this.btnLoading = true
-        this.form.name = this.form.name+" "+this.form.surname
+        this.form.name = this.form.name_inc+" "+this.form.surname
         this.username = Math.random().toString(36).substr(2, 20)
         axios
         .post(process.env.VUE_APP_WP_URL + "wp-json/wp/v2/users",{

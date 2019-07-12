@@ -363,6 +363,7 @@
                       <td>{{ props.item.title }}</td>
                       <td>{{ props.item.link }}</td>
                       <td>{{ props.item.clicks_count }}</td>
+                      <td>{{ formatDateTime(props.item.created_at) }}</td>
                     </template>
                     <template v-slot:footer>
                       <td><strong>Total</strong></td>
@@ -454,7 +455,8 @@ export default {
         {text:'ID',value:'id'},
         {text:'Título',value:'title'},
         {text:'Link', sortable: false },
-        {text: 'Clicks', value:'clicks_count' }
+        {text: 'Clicks', value:'clicks_count' },
+        {text:'Data Matéria' },
       ],
       totalClicks:0,
       new:false,

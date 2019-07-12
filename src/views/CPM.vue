@@ -131,6 +131,7 @@ export default {
     },
     money: {
       decimal: ',',
+      thousands: '.',
       precision: 2
     }
   }),

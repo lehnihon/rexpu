@@ -3,6 +3,7 @@ import Router from 'vue-router'
 import store from './store';
 import Login from './views/Login'
 import Cadastro from './views/Cadastro'
+import EsqueciSenha from './views/EsqueciSenha'
 import CadastroIndicacoes from './views/CadastroIndicacoes'
 import Painel from './views/Painel'
 import CPM from './views/CPM'
@@ -18,12 +19,9 @@ import Financeiro from './views/Financeiro'
 import Configuracoes from './views/Configuracoes'
 import Indicacoes from './views/Indicacoes'
 
-
 Vue.use(Router)
 
 const router =  new Router({
-  mode: 'history',
-  base: process.env.BASE_URL,
   routes: [
     {
       path: '/',
@@ -35,6 +33,11 @@ const router =  new Router({
       path: '/login',
       name: 'login',
       component: Login
+    },
+    {
+      path: '/esqueci-senha/:hash',
+      name: 'esqueci-senha',
+      component: EsqueciSenha
     },
     {
       path: '/cadastro',

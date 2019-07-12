@@ -7,11 +7,9 @@
         </v-flex>
         <v-flex xsauto>
         </v-flex>
-        <v-flex xs1>
-          <v-btn small flat href="/cadastro" class="white--text"><v-icon class="mr-2">person_pin</v-icon> Cadastro</v-btn>
-        </v-flex>
-        <v-flex xs1>
-          <v-btn small flat href="/login" class="white--text"><v-icon class="mr-2">vpn_key</v-icon> Entrar</v-btn>
+        <v-flex xs3>
+          <v-btn small flat to="/cadastro" class="white--text"><v-icon class="mr-2">person_pin</v-icon> Cadastro</v-btn>
+          <v-btn small flat to="/login" class="white--text"><v-icon class="mr-2">vpn_key</v-icon> Entrar</v-btn>
         </v-flex>
       </v-layout>
       <v-layout align-center justify-center>
@@ -48,13 +46,43 @@
               </v-form>
             </v-card-text>
             <v-card-actions>
-              <v-spacer></v-spacer>
-              <v-btn :disabled="!valid" color="primary" @click="login">Entrar</v-btn>
+              <v-layout row wrap>
+                <v-flex xs12 class="text-xs-center">
+                  <v-btn :loading="loggingIn" :disabled="!valid" color="primary" @click="login">Entrar</v-btn>
+                </v-flex>
+              </v-layout>
+            </v-card-actions>
+            <v-card-actions>
+              <v-layout row wrap>
+                <v-flex xs4 class="text-xs-center">
+                  <v-btn @click="dialog = true" flat small>Esqueci minha senha</v-btn>
+                </v-flex>
+                <v-flex ml-auto xs4 class="text-xs-center">
+                  <v-btn to="cadastro" flat small>Criar conta</v-btn>
+                </v-flex>
+              </v-layout>
             </v-card-actions>
           </v-card>
         </v-flex>
       </v-layout>
     </v-container>
+    <v-snackbar v-model="snackbar" bottom :timeout=1000>
+      {{ snackbarText }}
+      <v-btn color="pink" flat @click="snackbar = false">Fechar</v-btn>
+    </v-snackbar>
+    <v-dialog v-model="dialog" width="500">
+      <v-card class="py-3 px-3">
+        <v-text-field
+          v-model="femail"
+          prepend-icon="email"
+          name="Email"
+          label="Email"
+          type="text"
+          required
+        ></v-text-field>
+        <v-btn :loading="btnLoadingb" :disabled="btnLoadingb"  color="primary" @click="forgot">Enviar</v-btn>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
@@ -78,12 +106,18 @@ export default {
   data: () => ({
     valid: false,
     email: null,
-    password: null
+    femail:null,
+    password: null,
+    btnLoading: false,
+    dialog:false,
+    btnLoadingb: false,
+    snackbar: false,
+    snackbarText: '',
   }),
   computed:{
     ...mapState([
       'loggingIn',
-      'loginError'
+      'loginError',
     ])
   },
   methods: {
@@ -96,6 +130,22 @@ export default {
         password: this.password
       });
     },
+    forgot(){
+      this.btnLoadingb = true
+      axios
+        .post(process.env.VUE_APP_API_URL+"/user/forgot",{email:this.femail,link:window.location.origin+"/#/esqueci-senha/"})
+        .then(response => {
+          this.btnLoadingb = false
+          this.snackbarText = "Email enviado!"
+          this.snackbar = true 
+          this.femail = ''
+          this.dialog = false
+        }).catch(error => {
+          this.btnLoadingb = false
+          this.snackbarText = "Erro ao enviar!"
+          this.snackbar = true   
+        })
+    }
   }
 };
 </script>

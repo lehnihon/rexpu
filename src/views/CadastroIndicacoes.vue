@@ -1,15 +1,15 @@
 <template>
-  <div class="cadastro">
+  <div class="cadastro-indicacoes">
     <v-container grid-list-md>
       <v-layout row wrap>
         <v-flex xs2>
-          <v-img src="/assets/img/white.png" width="100"></v-img>
+          <v-img src="assets/img/white.png" width="100"></v-img>
         </v-flex>
         <v-flex xsauto>
         </v-flex>
         <v-flex xs3>
-          <v-btn small flat href="/cadastro" class="white--text"><v-icon class="mr-2">person_pin</v-icon> Cadastro</v-btn>
-          <v-btn small flat href="/login" class="white--text"><v-icon class="mr-2">vpn_key</v-icon> Entrar</v-btn>
+          <v-btn small flat to="/cadastro" class="white--text"><v-icon class="mr-2">person_pin</v-icon> Cadastro</v-btn>
+          <v-btn small flat to="/login" class="white--text"><v-icon class="mr-2">vpn_key</v-icon> Entrar</v-btn>
         </v-flex>
       </v-layout>
       <v-layout align-center justify-center>
@@ -96,7 +96,7 @@ h1{
   color:#FFF;
   text-align: center;
 }
-.cadastro{
+.cadastro-indicacoes{
   background-color:#421065;
   min-height: 100vh;
 }

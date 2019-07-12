@@ -168,7 +168,8 @@ export default {
     },
     money: {
       decimal: ',',
-      precision: 2
+      precision: 2,
+      thousands: '.'
     },
     date1:new Date().toISOString().substr(0, 10),
     dateFormatted1: vm.formatDate(new Date().toISOString().substr(0, 10)),

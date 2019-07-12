@@ -30,6 +30,11 @@
                       <td>{{ props.item.name }}</td>
                       <td>{{ props.item.email }}</td>
                       <td>
+                        <v-btn class="mx-0" small fab flat @click="showDialogMember(props.item)">
+                          <v-icon> 
+                            search
+                          </v-icon>
+                        </v-btn>
                         <v-btn small fab flat @click="editMember(props.item)">
                           <v-icon> 
                             edit
@@ -207,6 +212,23 @@
         </v-flex>
       </v-layout>
     </v-container>
+    <v-dialog v-model="dialog" width="500">
+      <v-card class="py-3 px-3">
+        <v-layout row wrap>
+          <v-flex xs12 class="mb-2"><strong>ID: </strong> {{member.show.id}}</v-flex>
+          <v-flex xs12 class="mb-2"><strong>NOME: </strong> {{member.show.name}}</v-flex>
+          <v-flex xs12 class="mb-2"><strong>EMAIL: </strong> {{member.show.email}}</v-flex>
+          <v-flex xs12 class="mb-2"><strong>TELEFONE: </strong> {{member.show.phone}}</v-flex>
+          <v-flex xs12 class="mb-2"><strong>FONTES: </strong> {{member.show.fonts}}</v-flex>
+          <v-flex xs12 class="mb-2"><strong>SALDO: </strong> R${{member.show.amount}}</v-flex>
+          <v-flex v-if="member.show.bank" xs12 class="mb-2"><strong>BANCO: </strong> {{member.show.bank.name}}</v-flex>
+          <v-flex xs12 class="mb-2"><strong>AGENCIA: </strong> {{member.show.agency}}</v-flex>
+          <v-flex xs12 class="mb-2"><strong>CONTA: </strong> {{member.show.account}}</v-flex>
+          <v-flex xs12 class="mb-2"><strong>CPF OU CNPJ: </strong> {{member.show.cpf}}</v-flex>
+        </v-layout>
+    
+      </v-card>
+    </v-dialog>
     <v-snackbar v-model="snackbar" bottom :timeout=1000>
       {{ snackbarText }}
       <v-btn color="pink" flat @click="snackbar = false">Close</v-btn>
@@ -224,6 +246,7 @@ export default {
   data: () => ({
     snackbar: false,
     snackbarText: '',
+    dialog:false,
     member:{
       headers:[
         {text:'ID',value:'id'},
@@ -231,7 +254,10 @@ export default {
         {text:'E-mail',value:'email'},
         { text: 'Ações', sortable: false }
       ],
+      show:{
+      },
       edit:{
+
         form:{
           id:'',
           name:'',
@@ -335,7 +361,7 @@ export default {
       this.member.edit.form.id = member.id
       this.member.edit.form.name = member.name
       this.member.edit.form.phone = member.phone
-      this.member.edit.form.accepted = (member.accepted == '0') ?  false : true
+      this.member.edit.form.accepted = (member.accepted == '0' || member.accepted == '2') ?  false : true
       this.member.edit.form.active = (member.active == '0') ? false : true
       this.member.edit.form.cpm_a = member.cpm_a
       this.member.edit.form.cpm_b = member.cpm_b
@@ -359,6 +385,11 @@ export default {
         this.member.edit.star = false
       }
       this.member.edit.new = true
+    },
+    showDialogMember(member){
+      console.log(member)
+      this.dialog = true
+      this.member.show = member
     },
     updateMember(){
       if (this.$refs.memberEdit.validate()) {

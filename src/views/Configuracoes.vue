@@ -82,7 +82,7 @@
                     label="CPF"
                     v-model="user.cpf"
                     :loading="user.loading"
-                     mask="###.###.###-##"
+                     v-mask="['###.###.###-##', '##.###.###/####-##']"
                   ></v-text-field>
                 </v-flex>
               </v-layout>
@@ -115,9 +115,11 @@
 <script>
   import axios from 'axios'
   import mixin from '../mixin'
+  import {mask} from 'vue-the-mask'
   export default {
     components: {
     },
+    directives: {mask},
     mixins: [mixin],
     data: () => ({
       user:{

@@ -7,7 +7,7 @@
           <v-card height="100%" color="primary" class="white--text">
             <v-card-title primary-title>
               <div>
-                <div class="headline" v-if="user">R${{user.amount}}</div>
+                <div class="headline" v-if="user">R${{formatPrice(user.amount)}}</div>
                 <span>SALDO</span>
               </div>
             </v-card-title>
@@ -17,7 +17,7 @@
           <v-card height="100%" color="error" class="white--text">
             <v-card-title primary-title>
               <div>
-                <div class="headline" v-if="cpm.list.publisher">R${{cpm.list.publisher.amount}}</div>
+                <div class="headline" v-if="cpm.list.publisher">R${{formatPrice(cpm.list.publisher.amount)}}</div>
                 <span>CPM PUBLISHER</span>
               </div>
             </v-card-title>
@@ -27,7 +27,7 @@
           <v-card height="100%" color="error" class="white--text">
             <v-card-title primary-title>
               <div>
-                <div class="headline" v-if="cpm.list.publisher">R${{cpm.list.redator.amount}}</div>
+                <div class="headline" v-if="cpm.list.publisher">R${{formatPrice(cpm.list.redator.amount)}}</div>
                 <span>CPM REDATOR</span>
               </div>
             </v-card-title>
@@ -44,8 +44,8 @@
           </v-card>
         </v-flex>
       </v-layout>
-      <v-layout v-if="(role.list.includes(2) || role.list.includes(3))" row wrap>
-        <v-flex>
+      <v-layout row wrap>
+        <v-flex v-if="role.list.includes(2)">
           <v-card height="100%" color="success" class="white--text">
             <v-card-title primary-title>
               <div>
@@ -55,7 +55,7 @@
             </v-card-title>
           </v-card>
         </v-flex>
-        <v-flex>
+        <v-flex v-if="role.list.includes(3)">
           <v-card height="100%" color="success" class="white--text">
             <v-card-title primary-title>
               <div>
@@ -65,21 +65,21 @@
             </v-card-title>
           </v-card>
         </v-flex>
-        <v-flex>
+        <v-flex v-if="role.list.includes(2)">
           <v-card height="100%" color="success" class="white--text">
             <v-card-title primary-title>
               <div>
-                <div class="headline" v-if="cpm.list.publisher">R${{value_publisher}}</div>
+                <div class="headline" v-if="cpm.list.publisher">R${{formatPrice(value_publisher)}}</div>
                 <span>GANHO PUBLISHER</span>
               </div>
             </v-card-title>
           </v-card>
         </v-flex>
-        <v-flex>
+        <v-flex v-if="role.list.includes(3)">
           <v-card height="100%" color="success" class="white--text">
             <v-card-title primary-title>
               <div>
-                <div class="headline" v-if="cpm.list.publisher">R${{value_redator}}</div>
+                <div class="headline" v-if="cpm.list.publisher">R${{formatPrice(value_redator)}}</div>
                 <span>GANHO REDATOR</span>
               </div>
             </v-card-title>
@@ -283,6 +283,10 @@ export default {
     value_redator:0,
   }),
   methods: {
+    formatPrice(value) {
+        let val = (value/1).toFixed(2).replace('.', ',')
+        return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+    },
     getCPM() {
       this.$axiosAPI
         .get(process.env.VUE_APP_API_URL+"/cpm/dashboard")
@@ -359,7 +363,7 @@ export default {
           .get(process.env.VUE_APP_API_URL+"/user/full/"+this.jwt_decode.sub)
           .then(response => {
             this.user = response.data.user
-            this.indication_link = window.location.origin+"/cadastro-indicacoes"
+            this.indication_link = window.location.origin+"/#/cadastro-indicacoes"
             this.clicks_publisher = response.data.clicks_publisher
             this.value_publisher = response.data.value_publisher
             this.clicks_redator = response.data.clicks_redator

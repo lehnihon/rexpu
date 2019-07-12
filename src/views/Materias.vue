@@ -364,7 +364,7 @@ export default {
   created() {
     this.getRole()
     this.getSubject()
-    if((role.list.includes(1) || role.list.includes(3))){
+    if((this.role.list.includes(1) || this.role.list.includes(3))){
       this.getSubjectWP()
     }
     this.getSuggestion()

@@ -229,7 +229,8 @@ export default {
     },
     money: {
       decimal: ',',
-      precision: 2
+      thousands: '',
+      precision: 2,
     }
   }),
   directives: {money: VMoney},
